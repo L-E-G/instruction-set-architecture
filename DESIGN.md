@@ -57,16 +57,16 @@ General bit operations:
 - Not
 
 ## Add
-*There is a separate instruction for each type.*
-
 **Assembly**:  
-`MNEMONIC <DEST> <OP1> <OP2>`
+*There is a separate instruction for each type.*
 
 | Type              | Mnemonic |
 | ----------------- | -------- |
 | Unsigned integer  | `ADDUI`  |
 | Signed integer    | `ADDSI`  |
 | Float             | `ADDF`   |
+
+`MNEMONIC <DEST> <OP1> <OP2>`
 
 **Behavior**:  
 Adds two numbers and stores the result.  
