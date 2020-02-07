@@ -37,7 +37,7 @@ Referred to in assembly as `R#` where `#` is a number.
 For both integers and floats:
 
 - [Add](#add)
-- Subtract
+- [Subtract](#subtract)
 - Divide
 - Multiply
 - Compare
@@ -78,6 +78,7 @@ Adds two numbers and stores the result.
 - `<OP2>`: Register containing second number
 
 **Organization**:
+
 `| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | register op1 (4 bits) | register op2 (4 bits)| (9 bits extra) |`
 
 ## Memory
