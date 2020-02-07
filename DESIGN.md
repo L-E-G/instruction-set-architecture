@@ -2,13 +2,23 @@
 ISA design.
 
 # Table Of Contents
-- [Basics](#basics)
+- [Documentation Syntax](#documentation-syntax)
+- [Fundamentals](#fundamentals)
 - [Types](#types)
 - [Registers](#registers)
 - [Status Codes](#status-codes)
 - [Instructions](#instructions)
 
-# Basics
+# Documentation Syntax
+## Assembly Documentation Syntax
+Instruction assembly is documented using the following syntax:
+
+- A word in curly brackets signifies a variation of an instruction's mnemonic. 
+  A table will be present which specifies valid values, the curly brackets and 
+  their contents should be replaced with one of these values.
+- A word in angle brackets signifies an instruction operand
+
+# Fundamentals
 **Endianess**: Little  
 **Word size**: 32 bits  
 **# Operands**: 3  
