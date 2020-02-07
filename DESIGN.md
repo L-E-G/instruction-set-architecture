@@ -105,7 +105,7 @@ Untyped general instructions:
 **Organization**:
 
 ```
-| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | register op1 (4 bits) | register op2 (4 bits)| (9 bits extra) |
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (4 bits) | immediate op2 (4 bits)| (9 bits extra) |
 ```
 
 **Behavior**:
@@ -142,6 +142,11 @@ CMP{TYPE} <OP1> <OP2>
 
 3 types = 3 total instructions.
 
+**Organization**:
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (4 bits) | immediate op2 (4 bits)| (9 bits extra) |
+```
+
 **Behavior**:
 
 Compares `<OP1>` to `<OP2>` and stores the result in the status register.  
@@ -169,6 +174,12 @@ AS{DIRECTION}{TYPE} <DEST> <OP1>
 ```
 
 2 directions * 2 types * 2 addressing modes: 8 total instructions.
+
+**Organization**:
+
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (4 bits) | (13 bits extra) |
+```
 
 **Behavior**:
 
@@ -207,6 +218,12 @@ LS{DIRECTION} <DEST> <OP1>
 
 2 directions * 2 addressing modes: 4 total instructions.
 
+**Organization**:
+
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (4 bits) | (13 bits extra) |
+```
+
 **Behavior**:
 
 Performs a logical shift (ignores the sign of the number) on `<OP1>` and 
@@ -236,6 +253,12 @@ TODO: Document how many bits are available for immediate values.
 ```
 
 3 operations * 2 addressing modes = 8 total instructions.
+
+**Organization**:
+
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (4 bits) | immediate op2 (4 bits) | (9 bits extra) |
+```
 
 **Behavior**:
 
@@ -269,6 +292,12 @@ NOT <DEST> <OP1>
 ```
 
 1 total instruction.
+
+**Organization**:
+
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (4 bits) | (13 bits extra) |
+```
 
 **Behavior**:
 
