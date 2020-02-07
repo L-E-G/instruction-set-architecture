@@ -44,26 +44,31 @@ Referred to in assembly as `R#` where `#` is a number.
 - `R31`: Return address
 
 # Status Codes
-The following are valid status codes (`bit pattern`: status name):
 
-- Any type:
-  - `0000`: Not equal
-  - `0001`: Equal
-  - `0010`: Greater than
-  - `0011`: Less than
-  - `0100`: Greater than or equal to
-  - `0101`: Less than or equal to
-- Integer codes:
-  - `0111`: Overflow
-- Float codes:
-  - `1000`: Zero
-  - `1001`: Nonzero
-  - `1010`: Underflow
-  - `1011`: NaN
-  - `1100`: Normalized
-  - `1101`: Infinity
-  - `1110`: Mantissa sign
-  - `1111`: Exponent sign
+Status codes valid for any type:
+
+| Bit Pattern | Assembly | Meaning                  |
+| ----------- | -------- | -------                  |
+| `0000`      | `NE`     | Not equal                |
+| `0001`      | `E`      | Equal                    |
+| `0010`      | `GT`     | Greater than             |
+| `0011`      | `LT`     | Less than                |
+| `0100`      | `GTE`    | Greater than or equal to |
+| `0101`      | `LTE`    | Less than or equal to    |
+| `0111`      | `OF`     | Overflow                 |
+| `1000`      | `Z`      | Zero                     |
+| `1001`      | `NZ`     | Not zero                 |
+
+Status codes specifically for float:
+
+| Bit Pattern | Assembly | Meaning       |
+| ----------- | -------- | -------       |
+| `1010`      | `UF`     | Underflow     |
+| `1011`      | `NAN`    | Not a number  |
+| `1100`      | `NM`     | Normalized    |
+| `1101`      | `INF`    | Infinity      |
+| `1110`      | `MS`     | Mantissa sign |
+| `1111`      | `ES`     | Exponent sign |
 
 # Instruction
 ## Arithmetic Logic Unit
