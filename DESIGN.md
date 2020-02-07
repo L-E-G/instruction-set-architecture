@@ -8,6 +8,15 @@ ISA design.
 - [Registers](#registers)
 - [Status Codes](#status-codes)
 - [Instructions](#instructions)
+  - [Arithmetic Logic Unit](#arithmetic-logic-unit)
+	- [Add, Subtract, Divide, Multiply](#arithmetic-instructions)
+	- [Compare](#compare)
+	- [Arithmetic Shift Left / Right](#arithmetic-shift)
+	- [Logical Shift Left / Right](#logical-shift)
+	- [And, Or, Xor](#3-operand-logic)
+	- [Not](#not)
+  - [Memory](#memory)
+  - [Control](#control)
 
 # Documentation Syntax
 ## Assembly Documentation Syntax
@@ -134,7 +143,7 @@ Status codes specifically for float:
 | `1110` | `MS`     | Mantissa sign |
 | `1111` | `ES`     | Exponent sign |
 
-# Instruction
+# Instructions
 ## Arithmetic Logic Unit
 Typed arithmetic instructions ([Docs](#arithmetic-instructions)):
 
