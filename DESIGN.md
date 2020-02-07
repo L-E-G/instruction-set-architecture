@@ -83,6 +83,7 @@ Word based operations:
 - Store
 - Push
 - Pop
+- Move
   
 ## Control
 - Jump on condition
