@@ -198,6 +198,8 @@ Each operand must be the same type, which is specified by appending `{TYPE}`:
 
 **Operands**:
 
+8 bits available for immediate/register fields.
+
 - `<DEST>`: Register to store result
 - `<OP1>`: Register containing first number
 - `<OP2>`: Register containing second number
@@ -210,6 +212,11 @@ CMP{TYPE} <OP1> <OP2>
 ```
 
 3 types = 3 total instructions.
+
+**Organization**:
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | immediate op2 (8 bits)| (1 bits extra) |
+```
 
 **Behavior**:
 
@@ -225,6 +232,8 @@ Each operand must be the same type, which is specified by appending `{TYPE}`:
 
 **Operands**:
 
+8 bits available for immediate/register fields.
+
 - `<OP1>`: Register containing first number to compare, on the left hand side of
   the comparison
 - `<OP2>`: Register containing number to compare to `<OP1>`, on the right hand 
@@ -238,6 +247,12 @@ AS{DIRECTION}{TYPE} <DEST> <OP1>
 ```
 
 2 directions * 2 types * 2 addressing modes: 8 total instructions.
+
+**Organization**:
+
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | (9 bits extra) |
+```
 
 **Behavior**:
 
@@ -262,7 +277,7 @@ The type of `<OP1>` is specified by appending `{TYPE}`:
 
 **Operands**:
 
-TODO: Document how many bits are available for immediate values.
+8 bits available for immediate/register fields.
 
 - `<DEST>`: Destination register
 - `<OP1>`: x-bit immediate value or register which contains amount to shift.
@@ -275,6 +290,12 @@ LS{DIRECTION} <DEST> <OP1>
 ```
 
 2 directions * 2 addressing modes: 4 total instructions.
+
+**Organization**:
+
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | (9 bits extra) |
+```
 
 **Behavior**:
 
@@ -292,7 +313,7 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 
 **Operands**:
 
-TODO: Document how many bits are available for immediate values.
+8 bits available for immediate/register fields
 
 - `<DEST>`: Destination register
 - `<OP1>`: x-bit immediate value or register which contains amount to shift.
@@ -305,6 +326,12 @@ TODO: Document how many bits are available for immediate values.
 ```
 
 3 operations * 2 addressing modes = 8 total instructions.
+
+**Organization**:
+
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | immediate op2 (8 bits) | (1 bits extra) |
+```
 
 **Behavior**:
 
@@ -323,7 +350,7 @@ The logic operation is specified by `{OPERATION}`:
 
 **Operands**:
 
-TODO: Document how many bits are available for immediate values.
+8 bits for immediate/register fields
 
 - `<DEST>`: Register result will be placed
 - `<OP1>`: Register containing value to perform logic operation on
@@ -338,6 +365,12 @@ NOT <DEST> <OP1>
 ```
 
 1 total instruction.
+
+**Organization**:
+
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (4 bits) | (13 bits extra) |
+```
 
 **Behavior**:
 
