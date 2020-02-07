@@ -5,6 +5,7 @@ ISA design.
 - [Basics](#basics)
 - [Types](#types)
 - [Registers](#registers)
+- [Status Codes](#status-codes)
 - [Instructions](#instructions)
 
 # Basics
@@ -28,25 +29,49 @@ Referred to in assembly as `R#` where `#` is a number.
 
 - `R0` through `R27` are general purpose registers
 - `R28`: Program counter
-- `R29`: Status
+- `R29`: Status, see [Status Codes](#status-codes) for details
 - `R30`: Stack pointer
 - `R31`: Return address
 
+# Status Codes
+The following are valid status codes (`bit pattern`: status name):
+
+- Any type:
+  - `0000`: Not equal
+  - `0001`: Equal
+  - `0010`: Greater than
+  - `0011`: Less than
+  - `0100`: Greater than or equal to
+  - `0101`: Less than or equal to
+- Integer codes:
+  - `0111`: Overflow
+- Float codes:
+  - `1000`: Zero
+  - `1001`: Nonzero
+  - `1010`: Underflow
+  - `1011`: NaN
+  - `1100`: Normalized
+  - `1101`: Infinity
+  - `1110`: Mantissa sign
+  - `1111`: Exponent sign
+
 # Instruction
 ## Arithmetic Logic Unit
-For both integers and floats:
+Typed arithmetic instructions ([Docs](#arithmetic-instructions)):
 
-- [Add](#add)
+- Add
 - Subtract
 - Divide
 - Multiply
-- Compare
-- Shift
+
+Typed general instructions:
+
+- Compare ([Docs](#compare))
+- Shift ([Docs](#arithmetic-shift))
   - Arithmetic Right
   - Arithmetic Left
-- Compare
 
-General bit operations:
+Untyped general instructions:
 
 - Shift
   - Logical Right
@@ -56,26 +81,104 @@ General bit operations:
 - Xor
 - Not
 
-## Add
-**Assembly**:  
-*There is a separate instruction for each type.*
+## Arithmetic Instructions
+**Assembly**:
 
-| Type              | Mnemonic |
-| ----------------- | -------- |
-| Unsigned integer  | `ADDUI`  |
-| Signed integer    | `ADDSI`  |
-| Float             | `ADDF`   |
+```
+{OPERATION}{TYPE} <DEST> <OP1> <OP2>
+```
 
-`MNEMONIC <DEST> <OP1> <OP2>`
+4 operations * 3 types = 12 total instructions.
 
-**Behavior**:  
-Adds two numbers and stores the result.  
+**Behavior**:
+
+Performs a basic arithmetic operation, determine by `{OPERATION}`:
+
+| `{OPERATION}` | Behavior        |
+| ------------- | --------------- |
+| `ADD`         | `<OP1> + <OP2>` |
+| `SUB`         | `<OP1> - <OP2>` |
+| `DIV`         | `<OP1> / <OP2>` |
+| `MLT`         | `<OP1> * <OP2>` |
+
+Each operand must be the same type, which is specified by appending `{TYPE}`:
+
+| `{TYPE}` | Type             |
+| -------- | ---------------- |
+| `UI`     | Unsigned integer |
+| `SI`     | Signed integer   |
+| `F`      | Float            |
 
 **Operands**:
 
 - `<DEST>`: Register to store result
 - `<OP1>`: Register containing first number
 - `<OP2>`: Register containing second number
+
+## Compare
+**Assembly**:
+
+```
+CMP{TYPE} <OP1> <OP2>
+```
+
+3 types = 3 total instructions.
+
+**Behavior**:
+
+Compares `<OP1>` to `<OP2>` and stores the result in the status register.  
+
+Each operand must be the same type, which is specified by appending `{TYPE}`:
+
+| `{TYPE}` | Type             |
+| -------- | ---------------- |
+| `UI`     | Unsigned integer |
+| `SI`     | Signed integer   |
+| `F`      | Float            |
+
+**Operands**:
+
+- `<OP1>`: Register containing first number to compare, on the left hand side of
+  the comparison
+- `<OP2>`: Register containing number to compare to `<OP1>`, on the right hand 
+  side of the comparison
+  
+## Arithmetic Shift
+**Assembly**:
+
+```
+AS{DIRECTION}{TYPE} <DEST> <OP1>
+```
+
+2 directions * 2 types * 2 addressing modes: 8 total instructions.
+
+**Behavior**:
+
+Performs an arithmetic shift (respects the sign of the number) on `<OP1>` and 
+stores the result in `<DEST>`.
+
+`<OP1>` can either be an immediate value or a register.  
+
+The direction bits are shifted is specified by `{DIRECTION}`:
+
+| `{DIRECTION}` | Direction |
+| ------------- | --------- |
+| `L`           | Left      |
+| `R`           | Right     |
+
+The type of `<OP1>` is specified by appending `{TYPE}`:
+
+| `{TYPE}` | Type             |
+| -------- | ---------------- |
+| `I`      | Signed integer   |
+| `F`      | Float            |
+
+**Operands**:
+
+TODO: Document how many bits are available for immediate values.
+
+- `<DEST>`: Destination register
+- `<OP1>`: x-bit immediate value or register which contains amount to shift.
 
 ## Memory
 Word based operations:
