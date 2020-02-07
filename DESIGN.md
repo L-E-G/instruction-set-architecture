@@ -83,7 +83,7 @@ Typed general instructions:
 
 Untyped general instructions:
 
-- Shift
+- Shift ([Docs](#logical-shift))
   - Logical Right
   - Logical Left
 - And
@@ -188,6 +188,36 @@ The type of `<OP1>` is specified by appending `{TYPE}`:
 | -------- | ---------------- |
 | `I`      | Signed integer   |
 | `F`      | Float            |
+
+**Operands**:
+
+TODO: Document how many bits are available for immediate values.
+
+- `<DEST>`: Destination register
+- `<OP1>`: x-bit immediate value or register which contains amount to shift.
+
+## Logical Shift
+**Assembly**:
+
+```
+LS{DIRECTION} <DEST> <OP1>
+```
+
+2 directions * 2 addressing modes: 4 total instructions.
+
+**Behavior**:
+
+Performs a logical shift (ignores the sign of the number) on `<OP1>` and 
+stores the result in `<DEST>`.
+
+`<OP1>` can either be an immediate value or a register.  
+
+The direction bits are shifted is specified by `{DIRECTION}`:
+
+| `{DIRECTION}` | Direction |
+| ------------- | --------- |
+| `L`           | Left      |
+| `R`           | Right     |
 
 **Operands**:
 
