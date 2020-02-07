@@ -51,30 +51,30 @@ General bit operations:
 - Not
 
 ## Integer Add
-**Assembly**: `ADD DEST OP1 OP2`  
+**Assembly**: `ADD <DEST> <OP1> <OP2>`  
 
 **Behavior**:  
 Adds two integers and stores the result.  
-`DEST = OP1 + OP2`
+`<DEST> = <OP1> + <OP2>`
 
 **Operands**:
 
-- `DEST`: Register to store result
-- `OP1`: Register containing first integer
-- `OP2`: Register containing second integer
+- `<DEST>`: Register to store result
+- `<OP1>`: Register containing first integer
+- `<OP2>`: Register containing second integer
 
 ## Float Add
-**Assembly**: `ADD DEST OP1 OP2`  
+**Assembly**: `ADD <DEST> <OP1> <OP2>`  
 
 **Behavior**:  
 Adds two floats and stores the result.  
-`DEST = OP1 + OP2`
+`<DEST> = <OP1> + <OP2>`
 
 **Operands**:
 
-- `DEST`: Register to store result
-- `OP1`: Register containing first float
-- `OP2`: Register containing second float
+- `<DEST>`: Register to store result
+- `<OP1>`: Register containing first float
+- `<OP2>`: Register containing second float
 
 ## Memory
 Word based operations:
