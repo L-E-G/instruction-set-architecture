@@ -90,6 +90,12 @@ Untyped general instructions:
 
 4 operations * 3 types = 12 total instructions.
 
+**Organization**:
+
+```
+| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | register op1 (4 bits) | register op2 (4 bits)| (9 bits extra) |
+```
+
 **Behavior**:
 
 Performs a basic arithmetic operation, determine by `{OPERATION}`:
