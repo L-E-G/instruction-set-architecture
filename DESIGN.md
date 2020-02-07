@@ -86,12 +86,13 @@ Untyped general instructions:
 - Shift ([Docs](#logical-shift))
   - Logical Right
   - Logical Left
-- And
-- Or
-- Xor
-- Not
+- Logic ([Docs](#logic))
+  - And
+  - Or
+  - Xor
+  - Not
 
-## Arithmetic Instructions
+### Arithmetic Instructions
 **Assembly**:
 
 ```
@@ -131,7 +132,7 @@ Each operand must be the same type, which is specified by appending `{TYPE}`:
 - `<OP1>`: Register containing first number
 - `<OP2>`: Register containing second number
 
-## Compare
+### Compare
 **Assembly**:
 
 ```
@@ -159,7 +160,7 @@ Each operand must be the same type, which is specified by appending `{TYPE}`:
 - `<OP2>`: Register containing number to compare to `<OP1>`, on the right hand 
   side of the comparison
   
-## Arithmetic Shift
+### Arithmetic Shift
 **Assembly**:
 
 ```
@@ -196,7 +197,7 @@ TODO: Document how many bits are available for immediate values.
 - `<DEST>`: Destination register
 - `<OP1>`: x-bit immediate value or register which contains amount to shift.
 
-## Logical Shift
+### Logical Shift
 **Assembly**:
 
 ```
