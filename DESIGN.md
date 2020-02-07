@@ -77,6 +77,9 @@ Adds two numbers and stores the result.
 - `<OP1>`: Register containing first number
 - `<OP2>`: Register containing second number
 
+**Organization**:
+`| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | register op1 (4 bits) | register op2 (4 bits)| (9 bits extra) |`
+
 ## Memory
 Word based operations:
 
