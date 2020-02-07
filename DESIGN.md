@@ -86,11 +86,12 @@ Untyped general instructions:
 - Shift ([Docs](#logical-shift))
   - Logical Right
   - Logical Left
-- Logic ([Docs](#logic))
+- 3 operand logic ([Docs](#3-operand-logic))
   - And
   - Or
   - Xor
-  - Not
+- 2 operand logic
+  - Not ([Docs](#not))
 
 ### Arithmetic Instructions
 **Assembly**:
@@ -226,6 +227,57 @@ TODO: Document how many bits are available for immediate values.
 
 - `<DEST>`: Destination register
 - `<OP1>`: x-bit immediate value or register which contains amount to shift.
+
+### 3 Operand Logic
+**Assembly**:
+
+```
+{OPERATION} <DEST> <OP1> <OP2>
+```
+
+3 operations * 2 addressing modes = 8 total instructions.
+
+**Behavior**:
+
+Performs a logic operation on `<OP1>` and `<OP2>` and stores the result in the
+`<DEST>` register. 
+
+If `<OP2>` is an immediate value it will be padded with `0`'s to be 32 bits.
+
+The logic operation is specified by `{OPERATION}`:
+
+| `{OPERATION}` | Operation |
+| ------------- | --------- |
+| `AND`         | And       |
+| `OR`          | Or        |
+| `NOT`         | Not       |
+
+**Operands**:
+
+TODO: Document how many bits are available for immediate values.
+
+- `<DEST>`: Register result will be placed
+- `<OP1>`: Register containing value to perform logic operation on
+- `<OP2>`: x-bit immediate value or register to use as second operand in 
+  logic operation
+  
+### Not
+**Assembly**:
+
+```
+NOT <DEST> <OP1>
+```
+
+1 total instruction.
+
+**Behavior**:
+
+Inverts all the bits in `<OP1>` and stores them in `<DEST>`.
+
+**Operands**:
+
+- `<DEST>`: Register to store result
+- `<OP1>`: Register containing value to invert
 
 ## Memory
 Word based operations:
