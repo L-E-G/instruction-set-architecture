@@ -63,6 +63,7 @@ General bit operations:
 `MNEMONIC <DEST> <OP1> <OP2>`
 
 | Type              | Mnemonic |
+| ----------------- | -------- |
 | Unsigned integer  | `ADDUI`  |
 | Signed integer    | `ADDSI`  |
 | Float             | `ADDF`   |
