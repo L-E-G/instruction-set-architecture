@@ -47,28 +47,28 @@ Referred to in assembly as `R#` where `#` is a number.
 
 Status codes valid for any type:
 
-| Bit Pattern | Assembly | Meaning                  |
-| ----------- | -------- | -------                  |
-| `0000`      | `NE`     | Not equal                |
-| `0001`      | `E`      | Equal                    |
-| `0010`      | `GT`     | Greater than             |
-| `0011`      | `LT`     | Less than                |
-| `0100`      | `GTE`    | Greater than or equal to |
-| `0101`      | `LTE`    | Less than or equal to    |
-| `0111`      | `OF`     | Overflow                 |
-| `1000`      | `Z`      | Zero                     |
-| `1001`      | `NZ`     | Not zero                 |
+| Binary | Assembly | Meaning                  |
+| ------ | -------- | ------------------------ |
+| `0000` | `NE`     | Not equal                |
+| `0001` | `E`      | Equal                    |
+| `0010` | `GT`     | Greater than             |
+| `0011` | `LT`     | Less than                |
+| `0100` | `GTE`    | Greater than or equal to |
+| `0101` | `LTE`    | Less than or equal to    |
+| `0111` | `OF`     | Overflow                 |
+| `1000` | `Z`      | Zero                     |
+| `1001` | `NZ`     | Not zero                 |
 
 Status codes specifically for float:
 
-| Bit Pattern | Assembly | Meaning       |
-| ----------- | -------- | -------       |
-| `1010`      | `UF`     | Underflow     |
-| `1011`      | `NAN`    | Not a number  |
-| `1100`      | `NM`     | Normalized    |
-| `1101`      | `INF`    | Infinity      |
-| `1110`      | `MS`     | Mantissa sign |
-| `1111`      | `ES`     | Exponent sign |
+| Binary | Assembly | Meaning       |
+| ------ | -------- | ------------- |
+| `1010` | `UF`     | Underflow     |
+| `1011` | `NAN`    | Not a number  |
+| `1100` | `NM`     | Normalized    |
+| `1101` | `INF`    | Infinity      |
+| `1110` | `MS`     | Mantissa sign |
+| `1111` | `ES`     | Exponent sign |
 
 # Instruction
 ## Arithmetic Logic Unit
