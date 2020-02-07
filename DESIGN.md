@@ -3,17 +3,23 @@ ISA design.
 
 # Table Of Contents
 - [Basics](#basics)
+- [Types](#types)
 - [Registers](#registers)
 - [Instructions](#instructions)
 
 # Basics
 **Endianess**: Little  
 **Word size**: 32 bits  
-**Types**: Integers, floats  
 **# Operands**: 3  
 **Addressing Unit**: Word  
 **Address Space**: 2^32  
 **Memory organization**: Princeton
+
+# Types
+
+- 32 bit two's complement integer
+- 32 bit unsigned integer
+- 32 bit IEEE 754 float
 
 # Registers
 32 mixed 32-bit registers.
@@ -30,7 +36,7 @@ Referred to in assembly as `R#` where `#` is a number.
 ## Arithmetic Logic Unit
 For both integers and floats:
 
-- Add ([Integer](#integer-add), [Float](#float-add))
+- [Add](#add)
 - Subtract
 - Divide
 - Multiply
@@ -50,31 +56,21 @@ General bit operations:
 - Xor
 - Not
 
-## Integer Add
+## Add
+*There is a separate instruction for unsigned integers, signed integers,
+and floats*  
+
 **Assembly**: `ADD <DEST> <OP1> <OP2>`  
 
 **Behavior**:  
-Adds two integers and stores the result.  
+Adds two numbers and stores the result.  
 `<DEST> = <OP1> + <OP2>`
 
 **Operands**:
 
 - `<DEST>`: Register to store result
-- `<OP1>`: Register containing first integer
-- `<OP2>`: Register containing second integer
-
-## Float Add
-**Assembly**: `ADD <DEST> <OP1> <OP2>`  
-
-**Behavior**:  
-Adds two floats and stores the result.  
-`<DEST> = <OP1> + <OP2>`
-
-**Operands**:
-
-- `<DEST>`: Register to store result
-- `<OP1>`: Register containing first float
-- `<OP2>`: Register containing second float
+- `<OP1>`: Register containing first number
+- `<OP2>`: Register containing second number
 
 ## Memory
 Word based operations:
