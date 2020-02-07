@@ -53,7 +53,7 @@ Instruction assembly is documented using the following syntax:
 	For example the assembly line `DO R1 R2 R3` has a `<DEST>` operand value of 
 	`R1`, a `<OP1>` operand value of `R2`, and a `<OP2>` operand value of `R3`.
 
-## Bit Organization
+## Bit Organization Syntax
 Instructions have a bit organization section which details the binary format of 
 the instruction itself.  
 
@@ -222,7 +222,7 @@ CMP{TYPE} <OP1> <OP2>
 
 3 types = 3 total instructions.
 
-**Organization**:
+**Bit Organization**:
 ```
 | condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | immediate op2 (8 bits)| (1 bits extra) |
 ```
@@ -257,7 +257,7 @@ AS{DIRECTION}{TYPE} <DEST> <OP1>
 
 2 directions * 2 types * 2 addressing modes: 8 total instructions.
 
-**Organization**:
+**Bit Organization**:
 
 ```
 | condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | (9 bits extra) |
@@ -300,7 +300,7 @@ LS{DIRECTION} <DEST> <OP1>
 
 2 directions * 2 addressing modes: 4 total instructions.
 
-**Organization**:
+**Bit Organization**:
 
 ```
 | condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | (9 bits extra) |
@@ -336,7 +336,7 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 
 3 operations * 2 addressing modes = 8 total instructions.
 
-**Organization**:
+**Bit Organization**:
 
 ```
 | condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | immediate op2 (8 bits) | (1 bits extra) |
@@ -375,7 +375,7 @@ NOT <DEST> <OP1>
 
 1 total instruction.
 
-**Organization**:
+**Bit Organization**:
 
 ```
 | condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (4 bits) | (13 bits extra) |
