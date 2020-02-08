@@ -182,9 +182,17 @@ Untyped general instructions:
 
 **Bit Organization**:
 
+If we are operating out of two registers:
+
 | Condition | Type | Opcode | Dest | OP1 | OP2 | Extra |
 | --------- | ---- | ------ | ---- | --- | --- | ----- |
 | 4         | 2    | 5      | 4    | 4   | 4   | 9     |
+
+If we are operating with an integer:
+
+| Condition | Type | Opcode | Dest | OP1 | Immediate | Extra |
+| --------- | ---- | ------ | ---- | --- | --------- | ----- |
+| 4         | 2    | 5      | 4    | 4   | 8         | 5     |
 
 **Behavior**:
 
@@ -223,9 +231,18 @@ CMP{TYPE} <OP1> <OP2>
 3 types = 3 total instructions.
 
 **Bit Organization**:
-```
-| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | immediate op2 (8 bits)| (1 bits extra) |
-```
+
+If we are operating out of two registers:
+
+| Condition | Type | Opcode | OP1 | OP2 | Extra |
+| --------- | ---- | ------ | --- | --- | ----- |
+| 4         | 2    | 5      | 4   | 4   | 13    |
+
+If we are operating with an integer:
+
+| Condition | Type | Opcode | OP1 | Immediate | Extra |
+| --------- | ---- | ------ | --- | --------- | ----- |
+| 4         | 2    | 5      | 4   | 8         | 9     |
 
 **Behavior**:
 
@@ -259,9 +276,17 @@ AS{DIRECTION}{TYPE} <DEST> <OP1>
 
 **Bit Organization**:
 
-```
-| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | (9 bits extra) |
-```
+If we are operating out of two registers:
+
+| Condition | Type | Opcode | Dest | OP1 | Extra |
+| --------- | ---- | ------ | ---- | --- | ----- |
+| 4         | 2    | 5      | 4    | 4   | 13    |
+
+If we are operating with an integer:
+
+| Condition | Type | Opcode | Dest | Immediate | Extra |
+| --------- | ---- | ------ | ---- | --------- | ----- |
+| 4         | 2    | 5      | 4    | 8         | 9     |
 
 **Behavior**:
 
@@ -302,9 +327,17 @@ LS{DIRECTION} <DEST> <OP1>
 
 **Bit Organization**:
 
-```
-| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | (9 bits extra) |
-```
+If we are operating out of two registers:
+
+| Condition | Type | Opcode | Dest | OP1 | Extra |
+| --------- | ---- | ------ | ---- | --- | ----- |
+| 4         | 2    | 5      | 4    | 4   | 13    |
+
+If we are operating with an integer:
+
+| Condition | Type | Opcode | Dest | Immediate | Extra |
+| --------- | ---- | ------ | ---- | --------- | ----- |
+| 4         | 2    | 5      | 4    | 8         | 9     |
 
 **Behavior**:
 
@@ -338,9 +371,17 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 
 **Bit Organization**:
 
-```
-| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (8 bits) | immediate op2 (8 bits) | (1 bits extra) |
-```
+If we are operating out of two registers:
+
+| Condition | Type | Opcode | Dest | OP1 | OP2 | Extra |
+| --------- | ---- | ------ | ---- | --- | --- | ----- |
+| 4         | 2    | 5      | 4    | 4   | 4   | 9     |
+
+If we are operating with an integer:
+
+| Condition | Type | Opcode | Dest | OP1 | Immediate | Extra |
+| --------- | ---- | ------ | ---- | --- | --------- | ----- |
+| 4         | 2    | 5      | 4    | 4   | 8         | 5     |
 
 **Behavior**:
 
@@ -377,9 +418,17 @@ NOT <DEST> <OP1>
 
 **Bit Organization**:
 
-```
-| condition (4 bits) | instruc. type (2 bits) | Opcode (5 bits) | register dest. (4 bits) | immediate op1 (4 bits) | (13 bits extra) |
-```
+If we are operating out of two registers:
+
+| Condition | Type | Opcode | Dest | OP1 | Extra |
+| --------- | ---- | ------ | ---- | --- | ----- |
+| 4         | 2    | 5      | 4    | 4   | 13    |
+
+If we are operating with an integer:
+
+| Condition | Type | Opcode | Dest | Immediate | Extra |
+| --------- | ---- | ------ | ---- | --------- | ----- |
+| 4         | 2    | 5      | 4    | 8         | 9     |
 
 **Behavior**:
 
