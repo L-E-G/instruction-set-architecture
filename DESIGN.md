@@ -171,6 +171,19 @@ Untyped general instructions:
 - 2 operand logic
   - Not ([Docs](#not))
 
+## Memory
+Word based operations:
+
+- Load ([Docs](#load))
+- Store ([Docs](#store))
+- Push ([Docs](#push))
+- Pop ([Docs](#pop))
+- Move ([Docs](#move))
+
+## Control
+- Jump on condition
+- Jump unconditional
+
 ### Arithmetic Instructions
 **Assembly**:
 
@@ -188,7 +201,7 @@ If we are operating out of two registers:
 | --------- | ---- | ------ | ---- | --- | --- | ----- |
 | 4         | 2    | 5      | 4    | 4   | 4   | 9     |
 
-If we are operating with an integer:
+If we are operating with an integer/float:
 
 | Condition | Type | Opcode | Dest | OP1 | Immediate | Extra |
 | --------- | ---- | ------ | ---- | --- | --------- | ----- |
@@ -238,7 +251,7 @@ If we are operating out of two registers:
 | --------- | ---- | ------ | --- | --- | ----- |
 | 4         | 2    | 5      | 4   | 4   | 13    |
 
-If we are operating with an integer:
+If we are operating with an integer/float:
 
 | Condition | Type | Opcode | OP1 | Immediate | Extra |
 | --------- | ---- | ------ | --- | --------- | ----- |
@@ -282,7 +295,7 @@ If we are operating out of two registers:
 | --------- | ---- | ------ | ---- | --- | ----- |
 | 4         | 2    | 5      | 4    | 4   | 13    |
 
-If we are operating with an integer:
+If we are operating with an integer/float:
 
 | Condition | Type | Opcode | Dest | Immediate | Extra |
 | --------- | ---- | ------ | ---- | --------- | ----- |
@@ -333,7 +346,7 @@ If we are operating out of two registers:
 | --------- | ---- | ------ | ---- | --- | ----- |
 | 4         | 2    | 5      | 4    | 4   | 13    |
 
-If we are operating with an integer:
+If we are operating with an integer/float:
 
 | Condition | Type | Opcode | Dest | Immediate | Extra |
 | --------- | ---- | ------ | ---- | --------- | ----- |
@@ -377,7 +390,7 @@ If we are operating out of two registers:
 | --------- | ---- | ------ | ---- | --- | --- | ----- |
 | 4         | 2    | 5      | 4    | 4   | 4   | 9     |
 
-If we are operating with an integer:
+If we are operating with an integer/float:
 
 | Condition | Type | Opcode | Dest | OP1 | Immediate | Extra |
 | --------- | ---- | ------ | ---- | --- | --------- | ----- |
@@ -424,7 +437,7 @@ If we are operating out of two registers:
 | --------- | ---- | ------ | ---- | --- | ----- |
 | 4         | 2    | 5      | 4    | 4   | 13    |
 
-If we are operating with an integer:
+If we are operating with an integer/float:
 
 | Condition | Type | Opcode | Dest | Immediate | Extra |
 | --------- | ---- | ------ | ---- | --------- | ----- |
@@ -439,15 +452,134 @@ Inverts all the bits in `<OP1>` and stores them in `<DEST>`.
 - `<DEST>`: Register to store result
 - `<OP1>`: Register containing value to invert
 
-## Memory
-Word based operations:
+### Load
+**Assembly**:
+```
+LDR <DEST> <ADDR>
+```
+1 total instruction
 
-- Load
-- Store
-- Push
-- Pop
-- Move
+**Bit Organization**:
+
+| Condition | Type | Opcode | Dest | Addr | Extra |
+| --------- | ---- | ------ | ---- | ---- | ----- |
+| 4         | 2    | 5      | 4    | 4    | 13    |
+
+**Behavior**:
+
+Loads all data from memory address `<ADDR>` and stores it in `<DEST>`.
+
+**Operands**:
+
+- `<DEST>`: Register to store result
+- `<ADDR>`: Register containing the memory address to access
+
+### Store
+**Assembly**:
+```
+STR <REG> <ADDR>
+```
+1 total instruction
+
+**Bit Organization**:
+
+| Condition | Type | Opcode | Reg | Addr | Extra |
+| --------- | ---- | ------ | --- | ---- | ----- |
+| 4         | 2    | 5      | 4   | 4    | 13    |
+
+**Behavior**:
+
+Takes all data from register `<REG>` and stores it in memory address `<ADDR>`.
+
+**Operands**:
+
+- `<REG>`: Register containing data
+- `<ADDR>`: Register containing the memory address to store data
+
+### Push
+**Assembly**:
+```
+PUSH <SP> <REG>
+```
+1 total instruction
+
+**Bit Organization**:
+
+| Condition | Type | Opcode | Stack Ptr.  | Reg  | Extra |
+| --------- | ---- | ------ | ----------- | ---- | ----- |
+| 4         | 2    | 5      | 4           | 4    | 13    |
+
+**Behavior**:
+
+Takes all data from register `<REG>` and pushes it to stack using the stack pointer (`<SP>`)
+
+**Operands**:
+
+- `<SP>`: Stack Pointer
+- `<REG>`: Register containing the data to be stored on stack
+
+### Pop
+**Assembly**:
+```
+POP <SP> <DEST>
+```
+1 total instruction
+
+**Bit Organization**:
+
+| Condition | Type | Opcode | Stack Ptr.  | Dest  | Extra |
+| --------- | ---- | ------ | ----------- | ----- | ----- |
+| 4         | 2    | 5      | 4           | 4     | 13    |
+
+**Behavior**:
+
+Takes all data off stack using `<SP>` and stores it in `<DEST>`
+
+**Operands**:
+
+- `<SP>`: Stack Pointer
+- `<DEST>`: The destination register for data being popped off stack
+
+### Move
+**Assembly**:
+```
+MV <DEST> <REG>
+```
+1 total instruction
+
+**Bit Organization**:
+
+| Condition | Type | Opcode | Dest | Reg  | Extra |
+| --------- | ---- | ------ | ---- | ---- | ----- |
+| 4         | 2    | 5      | 4    | 4    | 13    |
+
+**Behavior**:
+
+Moves data from register `<REG>` to `<DEST>`
+
+**Operands**:
+
+- `<REG>`: Any register
+- `<DEST>`: The destination register for data from `<REG>`
   
-## Control
-- Jump on condition
-- Jump unconditional
+### Jump
+**Assembly**:
+```
+JMP <DEST> <REG>
+```
+1 total instruction
+
+**Bit Organization**:
+
+| Condition | Type | Opcode | Dest | Reg  | Extra |
+| --------- | ---- | ------ | ---- | ---- | ----- |
+| 4         | 2    | 5      | 4    | 4    | 13    |
+
+**Behavior**:
+
+Moves data from register `<REG>` to `<DEST>`
+
+**Operands**:
+
+- `<REG>`: Any register
+- `<DEST>`: The destination register for data from `<REG>`
