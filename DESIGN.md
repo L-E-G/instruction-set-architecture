@@ -565,21 +565,41 @@ Moves data from register `<REG>` to `<DEST>`
 ### Jump
 **Assembly**:
 ```
-JMP <DEST> <REG>
+JMP <IP>
 ```
 1 total instruction
 
 **Bit Organization**:
 
-| Condition | Type | Opcode | Dest | Reg  | Extra |
-| --------- | ---- | ------ | ---- | ---- | ----- |
-| 4         | 2    | 5      | 4    | 4    | 13    |
+| Condition | Type | Opcode | Instr. Prt. Value | Extra |
+| --------- | ---- | ------ | ----------------- | ----- |
+| 4         | 2    | 5      | 16                | 1     |
 
 **Behavior**:
 
-Moves data from register `<REG>` to `<DEST>`
+Change instruction pointer to new value stored in `<IP>`
 
 **Operands**:
 
-- `<REG>`: Any register
-- `<DEST>`: The destination register for data from `<REG>`
+- `<IP>`: Value of the new instruction pointer
+
+### Jump (Conditional)
+**Assembly**:
+```
+JMP <IP>
+```
+1 total instruction
+
+**Bit Organization**:
+
+| Condition | Type | Opcode | Instr. Prt. Value | Extra |
+| --------- | ---- | ------ | ----------------- | ----- |
+| 4         | 2    | 5      | 16                | 1     |
+
+**Behavior**:
+
+Change instruction pointer to new value stored in `<IP>`
+
+**Operands**:
+
+- `<IP>`: Value of the new instruction pointer
