@@ -16,7 +16,13 @@ ISA design.
 	- [And, Or, Xor](#3-operand-logic)
 	- [Not](#not)
   - [Memory](#memory)
+	- [Load](#load)
+	- [Store](#store)
+	- [Push](#push)
+	- [Pop](#pop)
+	- [Move](#move)
   - [Control](#control)
+	- [Jump](#jump)
 
 # Documentation Syntax
 ## Assembly Documentation Syntax
@@ -109,42 +115,49 @@ Would translate to the following values for the fields defined in the example:
 32 mixed 32-bit registers.
 
 Referred to in assembly as `R#` where `#` is a number.  
+Some registers have aliases.  
 
 - `R0` through `R27` are general purpose registers
-- `R28`: Program counter
-- `R29`: Status, see [Status Codes](#status-codes) for details
-- `R30`: Stack pointer
-- `R31`: Return address
+- `R28`, `PC`: Program counter
+- `R29`, `STS`: Status, see [Status Codes](#status-codes) for details
+- `R30`, `SP`: Stack pointer
+- `R31`, `RA`: Return address
 
 # Status Codes
+The special status code `11111` is used to denote null status `NS`. This will 
+match any of the below status codes if used as a condition code.
 
 Status codes valid for any type:
 
-| Binary | Assembly | Meaning                  |
-| ------ | -------- | ------------------------ |
-| `0000` | `NE`     | Not equal                |
-| `0001` | `E`      | Equal                    |
-| `0010` | `GT`     | Greater than             |
-| `0011` | `LT`     | Less than                |
-| `0100` | `GTE`    | Greater than or equal to |
-| `0101` | `LTE`    | Less than or equal to    |
-| `0111` | `OF`     | Overflow                 |
-| `1000` | `Z`      | Zero                     |
-| `1001` | `NZ`     | Not zero                 |
+| Binary  | Assembly | Meaning                  |
+| ------  | -------- | ------------------------ |
+| `00000` | `NE`     | Not equal                |
+| `00001` | `E`      | Equal                    |
+| `00010` | `GT`     | Greater than             |
+| `00011` | `LT`     | Less than                |
+| `00100` | `GTE`    | Greater than or equal to |
+| `00101` | `LTE`    | Less than or equal to    |
+| `00111` | `OF`     | Overflow                 |
+| `01000` | `Z`      | Zero                     |
+| `01001` | `NZ`     | Not zero                 |
 
 Status codes specifically for float:
 
-| Binary | Assembly | Meaning       |
-| ------ | -------- | ------------- |
-| `1010` | `UF`     | Underflow     |
-| `1011` | `NAN`    | Not a number  |
-| `1100` | `NM`     | Normalized    |
-| `1101` | `INF`    | Infinity      |
-| `1110` | `MS`     | Mantissa sign |
-| `1111` | `ES`     | Exponent sign |
+| Binary  | Assembly | Meaning       |
+| ------  | -------- | ------------- |
+| `01010` | `UF`     | Underflow     |
+| `01011` | `NAN`    | Not a number  |
+| `01100` | `NM`     | Normalized    |
+| `01101` | `INF`    | Infinity      |
+| `01110` | `MS`     | Mantissa sign |
+| `01111` | `ES`     | Exponent sign |
 
 # Instructions
+3 instruction types.
+
 ## Arithmetic Logic Unit
+36 total instructions.
+
 Typed arithmetic instructions ([Docs](#arithmetic-instructions)):
 
 - Add
@@ -171,19 +184,6 @@ Untyped general instructions:
 - 2 operand logic
   - Not ([Docs](#not))
 
-## Memory
-Word based operations:
-
-- Load ([Docs](#load))
-- Store ([Docs](#store))
-- Push ([Docs](#push))
-- Pop ([Docs](#pop))
-- Move ([Docs](#move))
-
-## Control
-- Jump on condition ([Docs](#jump))
-- Jump unconditional
-
 ### Arithmetic Instructions
 **Assembly**:
 
@@ -195,17 +195,9 @@ Word based operations:
 
 **Bit Organization**:
 
-If we are operating out of two registers:
-
-| Condition | Type | Opcode | Dest | OP1 | OP2 | Extra |
-| --------- | ---- | ------ | ---- | --- | --- | ----- |
-| 4         | 2    | 5      | 4    | 4   | 4   | 9     |
-
-If we are operating with an integer/float:
-
-| Condition | Type | Opcode | Dest | OP1 | Immediate | Extra |
-| --------- | ---- | ------ | ---- | --- | --------- | ----- |
-| 4         | 2    | 5      | 4    | 4   | 8         | 5     |
+| Condition | Type | Operation | `<DEST>` | `<OP1>` | `<OP2>` | Not Used |
+| --------- | ---- | --------- | -------- | ------- | ------- | -------- |
+| 5         | 2    | 6         | 5        | 5       | 5       | 4        |
 
 **Behavior**:
 
@@ -228,8 +220,6 @@ Each operand must be the same type, which is specified by appending `{TYPE}`:
 
 **Operands**:
 
-8 bits available for immediate/register fields.
-
 - `<DEST>`: Register to store result
 - `<OP1>`: Register containing first number
 - `<OP2>`: Register containing second number
@@ -245,17 +235,9 @@ CMP{TYPE} <OP1> <OP2>
 
 **Bit Organization**:
 
-If we are operating out of two registers:
-
-| Condition | Type | Opcode | OP1 | OP2 | Extra |
-| --------- | ---- | ------ | --- | --- | ----- |
-| 4         | 2    | 5      | 4   | 4   | 13    |
-
-If we are operating with an integer/float:
-
-| Condition | Type | Opcode | OP1 | Immediate | Extra |
-| --------- | ---- | ------ | --- | --------- | ----- |
-| 4         | 2    | 5      | 4   | 8         | 9     |
+| Condition | Type | Operation | `<OP1>` | `<OP2>` | Not Used |
+| --------- | ---- | --------- | ------- | ------- | -------- |
+| 5         | 2    | 6         | 5       | 5       | 9        |
 
 **Behavior**:
 
@@ -270,8 +252,6 @@ Each operand must be the same type, which is specified by appending `{TYPE}`:
 | `F`      | Float            |
 
 **Operands**:
-
-8 bits available for immediate/register fields.
 
 - `<OP1>`: Register containing first number to compare, on the left hand side of
   the comparison
@@ -289,17 +269,17 @@ AS{DIRECTION}{TYPE} <DEST> <OP1>
 
 **Bit Organization**:
 
-If we are operating out of two registers:
+`<OP1>` register direct:
 
-| Condition | Type | Opcode | Dest | OP1 | Extra |
-| --------- | ---- | ------ | ---- | --- | ----- |
-| 4         | 2    | 5      | 4    | 4   | 13    |
+| Condition | Type | Operation | `<DEST>` | `<OP1>` | Not Used |
+| --------- | ---- | --------- | -------- | ------- | -------- |
+| 5         | 2    | 6         | 5        | 5       | 9        |
 
-If we are operating with an integer/float:
+`<OP1>` immediate:
 
-| Condition | Type | Opcode | Dest | Immediate | Extra |
-| --------- | ---- | ------ | ---- | --------- | ----- |
-| 4         | 2    | 5      | 4    | 8         | 9     |
+| Condition | Type | Operation | `<DEST>` | `<OP1>` |
+| --------- | ---- | --------- | -------- | ------- |
+| 5         | 2    | 6         | 5        | 14      |
 
 **Behavior**:
 
@@ -324,10 +304,8 @@ The type of `<OP1>` is specified by appending `{TYPE}`:
 
 **Operands**:
 
-8 bits available for immediate/register fields.
-
 - `<DEST>`: Destination register
-- `<OP1>`: x-bit immediate value or register which contains amount to shift.
+- `<OP1>`: 14-bit immediate value or register which contains amount to shift
 
 ### Logical Shift
 **Assembly**:
@@ -340,17 +318,17 @@ LS{DIRECTION} <DEST> <OP1>
 
 **Bit Organization**:
 
-If we are operating out of two registers:
+`<OP1>` register direct:
 
-| Condition | Type | Opcode | Dest | OP1 | Extra |
-| --------- | ---- | ------ | ---- | --- | ----- |
-| 4         | 2    | 5      | 4    | 4   | 13    |
+| Condition | Type | Operation | `<DEST>` | `<OP1>` | Not Used |
+| --------- | ---- | --------- | -------- | ------- | -------- |
+| 5         | 2    | 6         | 5        | 5       | 9        |
 
-If we are operating with an integer/float:
+`<OP1>` immediate:
 
-| Condition | Type | Opcode | Dest | Immediate | Extra |
-| --------- | ---- | ------ | ---- | --------- | ----- |
-| 4         | 2    | 5      | 4    | 8         | 9     |
+| Condition | Type | Operation | `<DEST>` | `<OP1>` |
+| --------- | ---- | --------- | -------- | ------- |
+| 5         | 2    | 6         | 5        | 14      |
 
 **Behavior**:
 
@@ -368,10 +346,8 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 
 **Operands**:
 
-8 bits available for immediate/register fields
-
 - `<DEST>`: Destination register
-- `<OP1>`: x-bit immediate value or register which contains amount to shift.
+- `<OP1>`: 14-bit immediate value or register which contains amount to shift.
 
 ### 3 Operand Logic
 **Assembly**:
@@ -384,17 +360,17 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 
 **Bit Organization**:
 
-If we are operating out of two registers:
+`<OP2>` register direct:
 
-| Condition | Type | Opcode | Dest | OP1 | OP2 | Extra |
-| --------- | ---- | ------ | ---- | --- | --- | ----- |
-| 4         | 2    | 5      | 4    | 4   | 4   | 9     |
+| Condition | Type | Operation | `<DEST>` | `<OP1>` | `<OP2>` | Not Used |
+| --------- | ---- | --------- | -------- | ------- | ------- | -------  |
+| 5         | 2    | 6         | 5        | 5       | 5       | 4        |
 
-If we are operating with an integer/float:
+`<OP2>` immediate:
 
-| Condition | Type | Opcode | Dest | OP1 | Immediate | Extra |
-| --------- | ---- | ------ | ---- | --- | --------- | ----- |
-| 4         | 2    | 5      | 4    | 4   | 8         | 5     |
+| Condition | Type | Operation | `<DEST>` | `<OP1>` | `<OP2>` |
+| --------- | ---- | --------- | -------- | ------- | ------- |
+| 5         | 2    | 6         | 5        | 5       | 9       |
 
 **Behavior**:
 
@@ -413,11 +389,9 @@ The logic operation is specified by `{OPERATION}`:
 
 **Operands**:
 
-8 bits for immediate/register fields
-
 - `<DEST>`: Register result will be placed
 - `<OP1>`: Register containing value to perform logic operation on
-- `<OP2>`: x-bit immediate value or register to use as second operand in 
+- `<OP2>`: 9-bit immediate value or register to use as second operand in 
   logic operation
   
 ### Not
@@ -431,17 +405,9 @@ NOT <DEST> <OP1>
 
 **Bit Organization**:
 
-If we are operating out of two registers:
-
-| Condition | Type | Opcode | Dest | OP1 | Extra |
-| --------- | ---- | ------ | ---- | --- | ----- |
-| 4         | 2    | 5      | 4    | 4   | 13    |
-
-If we are operating with an integer/float:
-
-| Condition | Type | Opcode | Dest | Immediate | Extra |
-| --------- | ---- | ------ | ---- | --------- | ----- |
-| 4         | 2    | 5      | 4    | 8         | 9     |
+| Condition | Type | Operation | `<DEST>` | `<OP1>` | Not Used |
+| --------- | ---- | --------- | -------- | ------- | -------- |
+| 5         | 2    | 6         | 5        | 5       | 9        |
 
 **Behavior**:
 
@@ -452,22 +418,36 @@ Inverts all the bits in `<OP1>` and stores them in `<DEST>`.
 - `<DEST>`: Register to store result
 - `<OP1>`: Register containing value to invert
 
+
+## Memory
+5 total instructions.
+
+Word based operations:
+
+- Load ([Docs](#load))
+- Store ([Docs](#store))
+- Push ([Docs](#push))
+- Pop ([Docs](#pop))
+- Move ([Docs](#move))
+
 ### Load
 **Assembly**:
 ```
 LDR <DEST> <ADDR>
 ```
-1 total instruction
+
+1 total instruction.
 
 **Bit Organization**:
 
-| Condition | Type | Opcode | Dest | Addr | Extra |
-| --------- | ---- | ------ | ---- | ---- | ----- |
-| 4         | 2    | 5      | 4    | 4    | 13    |
+| Condition | Type | Operation | `<DEST>` | `<ADDR>` | Not Used |
+| --------- | ---- | --------- | -------- | -------- | -------- |
+| 5         | 2    | 3         | 5        | 5        | 12       |
 
 **Behavior**:
 
-Loads all data from memory address `<ADDR>` and stores it in `<DEST>`.
+Reads a word of memory from the address specified by the `<ADDR>` register into 
+the `<DEST>` register.
 
 **Operands**:
 
@@ -477,129 +457,122 @@ Loads all data from memory address `<ADDR>` and stores it in `<DEST>`.
 ### Store
 **Assembly**:
 ```
-STR <REG> <ADDR>
+STR <SRC> <ADDR>
 ```
-1 total instruction
+
+1 total instruction.
 
 **Bit Organization**:
 
-| Condition | Type | Opcode | Reg | Addr | Extra |
-| --------- | ---- | ------ | --- | ---- | ----- |
-| 4         | 2    | 5      | 4   | 4    | 13    |
+| Condition | Type | Operation | `<SRC>` | `<ADDR>` | Not Used |
+| --------- | ---- | --------- | ------- | -------- | -------- |
+| 5         | 2    | 3         | 5       | 5        | 12       |
 
 **Behavior**:
 
-Takes all data from register `<REG>` and stores it in memory address `<ADDR>`.
+Writes a word of data from the `<SRC>` register to the memory address specified
+by the `<ADDR>` register.
 
 **Operands**:
 
-- `<REG>`: Register containing data
+- `<SRC>`: Register containing data
 - `<ADDR>`: Register containing the memory address to store data
 
 ### Push
 **Assembly**:
 ```
-PUSH <SP> <REG>
+PUSH <SRC>
 ```
-1 total instruction
+
+1 total instruction.
 
 **Bit Organization**:
 
-| Condition | Type | Opcode | Stack Ptr.  | Reg  | Extra |
-| --------- | ---- | ------ | ----------- | ---- | ----- |
-| 4         | 2    | 5      | 4           | 4    | 13    |
+| Condition | Type | Operation | `<SRC>` | Not Used |
+| --------- | ---- | --------- | ------- | -------- |
+| 5         | 2    | 3         | 5       | 17       |
 
 **Behavior**:
 
-Takes all data from register `<REG>` and pushes it to stack using the stack pointer (`<SP>`)
+Writes the contents of the `<SRC>` register to the word below the stack pointer
+in memory (`SP - 1`). Then sets the stack pointer register to this word.
 
 **Operands**:
 
-- `<SP>`: Stack Pointer
-- `<REG>`: Register containing the data to be stored on stack
+- `<SRC>`: Register containing the data to be stored on stack
 
 ### Pop
 **Assembly**:
 ```
-POP <SP> <DEST>
+POP <DEST>
 ```
-1 total instruction
+
+1 total instruction.
 
 **Bit Organization**:
 
-| Condition | Type | Opcode | Stack Ptr.  | Dest  | Extra |
-| --------- | ---- | ------ | ----------- | ----- | ----- |
-| 4         | 2    | 5      | 4           | 4     | 13    |
+| Condition | Type | Operation | `<DEST>` | Not Used |
+| --------- | ---- | --------- | -------- | -------- |
+| 5         | 2    | 3         | 5        | 17       |
 
 **Behavior**:
 
-Takes all data off stack using `<SP>` and stores it in `<DEST>`
+Reads a word from the memory address specified by the stack pointer register
+into the `<DEST>` register. Then increments the stack pointer register by one.
 
 **Operands**:
 
-- `<SP>`: Stack Pointer
 - `<DEST>`: The destination register for data being popped off stack
 
 ### Move
 **Assembly**:
 ```
-MV <DEST> <REG>
+MV <DEST> <SRC>
 ```
-1 total instruction
+
+1 total instruction.
 
 **Bit Organization**:
 
-| Condition | Type | Opcode | Dest | Reg  | Extra |
-| --------- | ---- | ------ | ---- | ---- | ----- |
-| 4         | 2    | 5      | 4    | 4    | 13    |
+| Condition | Type | Operation | `<DEST>` | `<SRC>`  | Not Used |
+| --------- | ---- | --------- | -------- | -------- | -------- |
+| 5         | 2    | 3         | 5        | 5        | 12       |
 
 **Behavior**:
 
-Moves data from register `<REG>` to `<DEST>`
+Transfers the contents of the `<SRC>` register to the `<DEST>` register.
 
 **Operands**:
 
-- `<REG>`: Any register
-- `<DEST>`: The destination register for data from `<REG>`
-  
+- `<DEST>`: The destination register
+- `<SRC>`: The source register
+
+## Control
+2 total instructions.
+
+- Jump ([Docs](#jump))
+
 ### Jump
 **Assembly**:
 ```
-JMP <IP>
+<CONDITION>JMP <ADDR>
 ```
-1 total instruction
+
+1 total instruction.
 
 **Bit Organization**:
 
-| Condition | Type | Opcode | Instr. Prt. Value | Extra |
-| --------- | ---- | ------ | ----------------- | ----- |
-| 4         | 2    | 5      | 16                | 1     |
+| Condition | Type | `<ADDR>` | Extra |
+| --------- | ---- | -------- | ----- |
+| 5         | 2    | 5        | 20    |
 
 **Behavior**:
 
-Change instruction pointer to new value stored in `<IP>`
+Only executes if the status register matches the value specified
+by `<CONDITION>`. If no condition is specified defaults to null status (`NS`).
+
+Sets the program counter register to the value stored in the `<ADDR>` register.
 
 **Operands**:
 
-- `<IP>`: Value of the new instruction pointer
-
-### Jump (Conditional)
-**Assembly**:
-```
-JMP <IP>
-```
-1 total instruction
-
-**Bit Organization**:
-
-| Condition | Type | Opcode | Instr. Prt. Value | Extra |
-| --------- | ---- | ------ | ----------------- | ----- |
-| 4         | 2    | 5      | 16                | 1     |
-
-**Behavior**:
-
-Change instruction pointer to new value stored in `<IP>`
-
-**Operands**:
-
-- `<IP>`: Value of the new instruction pointer
+- `<ADDR>`: Register containing new program counter value
