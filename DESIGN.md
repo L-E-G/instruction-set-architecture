@@ -181,7 +181,7 @@ Word based operations:
 - Move ([Docs](#move))
 
 ## Control
-- Jump on condition
+- Jump on condition ([Docs](#jump))
 - Jump unconditional
 
 ### Arithmetic Instructions
