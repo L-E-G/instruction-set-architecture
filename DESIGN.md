@@ -7,8 +7,6 @@ ISA design.
 - [Types](#types)
 - [Registers](#registers)
 - [Status Codes](#status-codes)
-- [Type Codes](#type-codes)
-- [Opcodes](#opcodes)
 - [Instructions](#instructions)
   - [Arithmetic Logic Unit](#arithmetic-logic-unit)
 	- [Add, Subtract, Divide, Multiply](#arithmetic-instructions)
@@ -154,68 +152,18 @@ Status codes specifically for float:
 | `01110` | `MS`     | Mantissa sign |
 | `01111` | `ES`     | Exponent sign |
 
-# Type Codes
-
-There are three types of instruction in out ISA: ALU instructions, memory instructions, and control instructions.  Because there are three instruction types, we only need 2 bits to represent these types.  The following is how the bits are assigned:
-
-| Binary | Meaning |
-| ------ | ------- |
-| `00`   | ALU     |
-| `01`   | Memory  |
-| `10`   | Control |
-
-
-# Opcodes
-
-The following is the binary representation of each of the instructions:
-
-**ALU**:
-
-For the ALU operations, we need at least 4 bits to represent all the instructions because there are 13 instructions total.  We are using 6 bits so that we have room to add more operations later.
-
-| Binary   | Meaning               |
-| -------  | -------------         |
-| `000000` | Add                   |
-| `000001` | Subtract              |
-| `000010` | Multiply              |
-| `000011` | Divide                |
-| `000100` | Compare               |
-| `000101` | Arithmetic Shift Left |
-| `000110` | Arithmetic Shift Right|
-| `000111` | Logical Shift Left    |
-| `001000` | Logical Shift Right   |
-| `001001` | And                   |
-| `001010` | Or                    |
-| `001011` | Xor                   |
-| `001100` | Not                   |
-
-**Memory**:
-
-There are only 5 memory instructions, this means we need 3 bits to represent all 5.
-
-| Binary  | Meaning |
-| ------- | ------- |
-| `000`   | Load    |
-| `001`   | Store   |
-| `010`   | Push    |
-| `011`   | Pop     |
-| `100`   | Move    |
-
-**Control**:
-
-There are only 2 instructions in this section.  This means only 1 bit would suffice to represent all these instructions, but we are using 2 in case we add more later on.
-
-| Binary | Meaning             |
-| ------ | ------------------- |
-| `00`   | Jump                |
-| `01`   | Jump on Condition   |
-
-
-
 # Instructions
-3 instruction types.
+3 instruction types:
+
+| Type Field Binary | Type    |
+| ----------------- | ------- |
+| `00`              | ALU     |
+| `01`              | Memory  |
+| `10`              | Control |
 
 ## Arithmetic Logic Unit
+**Instructions**:
+
 36 total instructions.
 
 Typed arithmetic instructions ([Docs](#arithmetic-instructions)):
@@ -243,6 +191,52 @@ Untyped general instructions:
   - Xor
 - 2 operand logic
   - Not ([Docs](#not))
+  
+**Bit Organization**:
+
+The operation field of each ALU instruction has the following meaning:
+
+| Binary   | Operation                                             |
+| -------  | -------------                                         |
+| `000001` | Add unsigned integer                                  |
+| `000010` | Add signed integer                                    |
+| `000011` | Add float                                             |
+| `000100` | Subtract unsigned integer                             |
+| `000101` | Subtract signed integer                               |
+| `000110` | Subtract float                                        |
+| `000111` | Divide unsigned integer                               |
+| `001000` | Divide signed integer                                 |
+| `001001` | Divide float                                          |
+| `001010` | Multiply unsigned integer                             |
+| `001011` | Multiply signed integer                               |
+| `001100` | Multiply float                                        |
+| -        | -                                                     |
+| `001101` | Compare unsigned integer                              |
+| `001110` | Compare signed integer                                |
+| `001111` | Compare float                                         |
+| -        | -                                                     |
+| `010000` | Arithmetic shift left signed integer register direct  |
+| `010001` | Arithmetic shift left float register direct           |
+| `010010` | Arithmetic shift right signed integer register direct |
+| `010011` | Arithmetic shift right float register direct          |
+| `010100` | Arithmetic shift left signed integer immediate        |
+| `010101` | Arithmetic shift left float immediate                 |
+| `010110` | Arithmetic shift right signed integer immediate       |
+| `010111` | Arithmetic shift right float immediate                |
+| -        | -                                                     |
+| `011000` | Logical shift left register direct                    |
+| `011001` | Logical shift left immediate                          |
+| `011010` | Logical shift right register direct                   |
+| `011011` | Logical shift right immediate                         |
+| -        | -                                                     |
+| `011100` | And register direct                                   |
+| `011101` | And immediate                                         |
+| `011110` | Or register direct                                    |
+| `011111` | Or immediate                                          |
+| `100000` | Xor register direct                                   |
+| `100001` | Xor immediate                                         |
+| -        | -                                                     |
+| `100010` | Not                                                   |
 
 ### Arithmetic Instructions
 **Assembly**:
@@ -490,6 +484,18 @@ Word based operations:
 - Pop ([Docs](#pop))
 - Move ([Docs](#move))
 
+**Bit Organization**:
+
+The operation field of each memory instruction has the following meaning:
+
+| Binary   | Operation |
+| -------- | --------- |
+| `000`    | Load      |
+| `001`    | Store     |
+| `010`    | Push      |
+| `011`    | Pop       |
+| `100`    | Move      |
+
 ### Load
 **Assembly**:
 ```
@@ -608,9 +614,13 @@ Transfers the contents of the `<SRC>` register to the `<DEST>` register.
 - `<SRC>`: The source register
 
 ## Control
-2 total instructions.
+1 total instruction.
 
 - Jump ([Docs](#jump))
+
+**Bit Organization**:
+
+Since there is currently only 1 control instruction there is no operation field.
 
 ### Jump
 **Assembly**:
@@ -622,9 +632,9 @@ Transfers the contents of the `<SRC>` register to the `<DEST>` register.
 
 **Bit Organization**:
 
-| Condition | Type | Operation | `<ADDR>` | Extra |
-| --------- | ---- | --------- | -------- | ----- |
-| 5         | 2    | 2         | 5        | 20    |
+| Condition | Type | `<ADDR>` | Extra |
+| --------- | ---- | -------- | ----- |
+| 5         | 2    | 5        | 22    |
 
 **Behavior**:
 
