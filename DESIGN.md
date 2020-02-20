@@ -26,13 +26,47 @@ regression tests whenever a bug is found.
 
 # Fundamentals
 **Endianess**: Little  
-**Word size**: 32 bits  
-**Addressing Unit**: Word  
-**Address Space**: 2^32  
 **Memory organization**: Harvard
 
 # Memory
-TODO: Describe instruction + data memory and frame buffer memory.
+The architecture memory is broken in to 2 parts:
+
+- Data and instructions
+- Frame buffer
+
+## Data and Instruction Memory
+**Word Size**: 32 bits  
+**Addressing Unit**: Word  
+**Address Space**: 2^32  
+
+Holds data and instructions. Can be manipulated directly via the load and 
+store instructions.  
+
+**Memory Hierarchy**:  
+
+1. Level 1: 64 KB, 4-way associative, 64 bytes / line (4 cycle delay)
+2. Level 2: 256 KB, direct mapped, 64 byte / line (11 cycle delay)
+3. Level 3: 8 MB, direct mapped, 64 byte / line (38 cycle delay)
+4. DRAM: $^32 \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
+
+## Frame Buffer Memory
+**Word Size**: 8 bits
+**Addressing Unit**: Word
+**Address Space**: 2^16  
+
+Holds pixels to be displayed to the user on a screen.  
+Screen size is 256 x 256 pixels.  
+Each pixel has a color depth of 8 bits.  
+
+There is an active frame buffer which is displayed and a secondary frame buffer
+where changes are made. They can be flipped so the secondary is the active and 
+the old active is now the secondary.
+
+Can only be manipulated by graphics instructions.
+
+**Memory Hierarchy**:
+
+1. Level 2: 128 KB, direct mapped, 64 bytes / line (11 cycle delay)
 
 # Types
 
