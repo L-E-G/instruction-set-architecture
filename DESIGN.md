@@ -115,39 +115,89 @@ TODO: Describe instruction + data memory and frame buffer memory.
 - 32 bit IEEE 754 float
 
 # Registers
-32 mixed 32-bit registers.
-
 Referred to in assembly as `R#` where `#` is a number.  
 Some registers have aliases.  
 
-- `R0` through `R26` are general purpose registers
-- `R27`, `IHDRL`: Interrupt handler, see [Interrupts](#interrupts) for details
-- `R28`, `PC`: Program counter
-- `R29`, `STS`: Status, see [Status Codes](#status-codes) for details
-- `R30`, `SP`: Stack pointer
-- `R31`, `LR`: Return address
+## General Purpose
+27 mixed 32-bit registers.
+
+`R0` through `R26`.
+
+Initially all set to 0.
+
+## Interrupt Handler
+32-bit register.  
+
+`R27` or `IHDLR`.  
+
+Stores the memory address of the interrupt handler subroutine.  
+Initially set to all 1's to indicate it has not been set.  
+
+See the [Interrupts section](#interrupts) for details.
+
+## Program Counter
+32-bit register.  
+
+`R28`, `PC`.  
+
+Stores the address of the current instruction being executed.  
+Initially set to 0.
+
+## Status
+6-bit register.
+
+`R29`, `STS`.
+
+Initially set to null status with the interrupt flag unset.  
+
+See the [Status Codes section](#status-codes) for details.
+
+## Stack Pointer
+32-bit register.  
+
+`R30`, `SP`.  
+
+Stores the address of the bottom of the stack in memory.
+Initially set to 0.
+
+## Link Register
+32-bit register.  
+
+`R31`, `LR`.  
+
+Store the address to return to after a subroutine has completed.  
+Initially set to 0.
 
 # Status Codes
-The special status code `11111` is used to denote null status `NS`. This will 
-match any of the below status codes if used as a condition code.
+The status register is 6-bits large.  
 
-Status codes valid for any type:
+The least significant 5 bits are used to store the status of comparisons and 
+arithmetic operations, called condition codes.  
 
-| Binary  | Assembly | Meaning                  |
-| ------  | -------- | ------------------------ |
-| `00000` | `NE`     | Not equal                |
-| `00001` | `E`      | Equal                    |
-| `00010` | `GT`     | Greater than             |
-| `00011` | `LT`     | Less than                |
-| `00100` | `GTE`    | Greater than or equal to |
-| `00101` | `LTE`    | Less than or equal to    |
-| `00111` | `OF`     | Overflow                 |
-| `01000` | `Z`      | Zero                     |
-| `01001` | `NZ`     | Not zero                 |
-| `01010` | `NEG`    | Negative                 |
-| `01011` | `POS`    | Positive                 |
+The most significant bit is an interrupt flag.
 
-Status codes specifically for float:
+## Condition Codes
+The special condition code `11111` is used to denote a null status `NS`.  
+This code will match every other condition code.
+
+Valid codes are:
+
+| Binary  | Assembly | Meaning                         |
+| ------  | -------- | ------------------------        |
+| `00000` | `NE`     | Not equal                       |
+| `00001` | `E`      | Equal                           |
+| `00010` | `GT`     | Greater than                    |
+| `00011` | `LT`     | Less than                       |
+| `00100` | `GTE`    | Greater than or equal to        |
+| `00101` | `LTE`    | Less than or equal to           |
+| `00111` | `OF`     | Overflow                        |
+| `01000` | `Z`      | Zero                            |
+| `01001` | `NZ`     | Not zero                        |
+| `01010` | `NEG`    | Negative                        |
+| `01011` | `POS`    | Positive                        |
+| `11111` | `NS`     | Null status, matches everything |
+
+Status codes specifically for floats:
 
 | Binary  | Assembly | Meaning       |
 | ------  | -------- | ------------- |
@@ -158,12 +208,12 @@ Status codes specifically for float:
 | `01110` | `MS`     | Mantissa sign |
 | `01111` | `ES`     | Exponent sign |
 
-There are also a few special status codes:
+## Interrupt Flag
+The interrupt flag signifies if an interrupt is currently being handled.  
+A value of `0` means no interrupts are being handled and vise versa.
 
-| Binary  | Assembly      | Meaning                                                                                              |
-| ------  | --------      | -------------                                                                                        |
-| `11110` | `NOINTERRUPT` | Indicates an interrupt is currently being handled so no other interrupts can be handled at this time |
-| `11111` | `NS`          | Null status, matches any other status code                                                           |
+If the interrupt flag is set no new interrupts can be handled. Any new 
+interrupts which come in will be ignored.
 
 # Condition Fields
 All instructions currently have space for a condition field.  
