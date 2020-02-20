@@ -103,7 +103,10 @@ Would translate to the following values for the fields defined in the example:
 **Word size**: 32 bits  
 **Addressing Unit**: Word  
 **Address Space**: 2^32  
-**Memory organization**: Princeton
+**Memory organization**: Harvard
+
+# Memory
+TODO: Describe instruction + data memory and frame buffer memory.
 
 # Types
 
@@ -117,11 +120,12 @@ Would translate to the following values for the fields defined in the example:
 Referred to in assembly as `R#` where `#` is a number.  
 Some registers have aliases.  
 
-- `R0` through `R27` are general purpose registers
+- `R0` through `R26` are general purpose registers
+- `R27`, `IHDRL`: Interrupt handler, see [Interrupts](#interrupts) for details
 - `R28`, `PC`: Program counter
 - `R29`, `STS`: Status, see [Status Codes](#status-codes) for details
 - `R30`, `SP`: Stack pointer
-- `R31`, `RA`: Return address
+- `R31`, `LR`: Return address
 
 # Status Codes
 The special status code `11111` is used to denote null status `NS`. This will 
@@ -140,6 +144,8 @@ Status codes valid for any type:
 | `00111` | `OF`     | Overflow                 |
 | `01000` | `Z`      | Zero                     |
 | `01001` | `NZ`     | Not zero                 |
+| `01010` | `NEG`    | Negative                 |
+| `01011` | `POS`    | Positive                 |
 
 Status codes specifically for float:
 
@@ -151,6 +157,69 @@ Status codes specifically for float:
 | `01101` | `INF`    | Infinity      |
 | `01110` | `MS`     | Mantissa sign |
 | `01111` | `ES`     | Exponent sign |
+
+There are also a few special status codes:
+
+| Binary  | Assembly      | Meaning                                                                                              |
+| ------  | --------      | -------------                                                                                        |
+| `01111` | `NOINTERRUPT` | Indicates an interrupt is currently being handled so no other interrupts can be handled at this time |
+| `11111` | `NS`          | Null status, matches any other status code                                                           |
+
+# Condition Fields
+All instructions currently have space for a condition field.  
+This field allows for predicated execution of instructions.  
+Currently only the jump instructions use this condition field.  
+
+All other instructions do not use this field at the moment, in the future they
+may. For right now the condition field will be set to null status.
+
+# Immediate Fields
+All immediate fields in instructions will be sign extended to 32-bits.
+
+# Interrupts
+The interrupt handler register holds the memory address for a subroutine which 
+will handle an interrupt. Initially this register is set to all 1's, which means
+the handler is unset. 
+
+The [Set Interrupt Handler](#set-interrupt-handler) instruction can be used to
+set this register.  
+
+The [Perform Interrupt](#perform-interrupt) instruction performs the following:
+
+- Check if status register is set to `NOINTERRUPT`, if it is exit the 
+  instruction, otherwise continue.
+- If the interrupt handler register is set to all 1's the interrupt handler is 
+  not set, exits the instruction.
+- Sets the status register to `NOINTERRUPT`
+- Registers `R0`, `R1`, and `STS` will be pushed to the stack
+- Sets the link register to the where program counter was before the interrupt
+  came in
+- Jump to the interrupt handler
+
+After the interrupt handler is done it must call 
+[Return From Interrupt](#return-from-interrupt) which does the following:
+
+- Pops registers `R0`, `R1`, and `STS`
+- Jumps to the address in the link register
+
+The interrupt code will be stored in `R0`, valid interrupt codes are:
+
+| Binary | Assembly   | Meaning                                                |
+| ------ | ---------- | -------                                                |
+| `0`    | `KEYPRESS` | A key was pressed, the key code will be stored in `R1` |
+
+`R1` holds additional details about an interrupt, for the `KEYPRESS` interrupt
+`R1` has the following values:
+
+| Binary | Assembly     | Meaning         |
+| ------ | --------     | -------         |
+| `000`  | `UPARROW`    | Up arrow key    |
+| `001`  | `DOWNARROW`  | Down arrow key  |
+| `010`  | `LEFTARROW`  | Left arrow key  |
+| `011`  | `RIGHTARROW` | Right arrow key |
+| `100`  | `ENTER`      | Enter key       |
+| `101`  | `ESCAPE`     | Escape key      |
+| `110`  | `SPACE`      | Space key       |
 
 # Instructions
 3 instruction types:
@@ -191,6 +260,7 @@ Untyped general instructions:
   - Xor
 - 2 operand logic
   - Not ([Docs](#not))
+- Move ([Docs](#move))
   
 **Bit Organization**:
 
@@ -245,13 +315,21 @@ The operation field of each ALU instruction has the following meaning:
 {OPERATION}{TYPE} <DEST> <OP1> <OP2>
 ```
 
-4 operations * 3 types = 12 total instructions.
+4 operations * 3 types * 2 addressing modes = 24 total instructions.
 
 **Bit Organization**:
+
+Register direct:
 
 | Condition | Type | Operation | `<DEST>` | `<OP1>` | `<OP2>` | Not Used |
 | --------- | ---- | --------- | -------- | ------- | ------- | -------- |
 | 5         | 2    | 6         | 5        | 5       | 5       | 4        |
+
+Immediate:
+
+| Condition | Type | Operation | `<DEST>` | `<OP1>` | `<OP2>` |
+| --------- | ---- | --------- | -------- | ------- | ------- |
+| 5         | 2    | 6         | 5        | 5       | 9       |
 
 **Behavior**:
 
@@ -264,7 +342,8 @@ Performs a basic arithmetic operation, determine by `{OPERATION}`:
 | `DIV`         | `<OP1> / <OP2>` |
 | `MLT`         | `<OP1> * <OP2>` |
 
-Each operand must be the same type, which is specified by appending `{TYPE}`:
+The type numbers used in the arithmetic operation is specified by 
+appending `{TYPE}`:
 
 | `{TYPE}` | Type             |
 | -------- | ---------------- |
@@ -276,7 +355,30 @@ Each operand must be the same type, which is specified by appending `{TYPE}`:
 
 - `<DEST>`: Register to store result
 - `<OP1>`: Register containing first number
-- `<OP2>`: Register containing second number
+- `<OP2>`: Register containing second number or a 9-bit immediate value
+
+### Move
+**Assembly**:
+```
+MV <DEST> <SRC>
+```
+
+1 total instruction.
+
+**Bit Organization**:
+
+| Condition | Type | Operation | `<DEST>` | `<SRC>` | Not Used |
+| --------- | ---- | --------- | -------- | ------- | -------- |
+| 5         | 2    | 6         | 5        | 5       | 9        |
+
+**Behavior**:
+
+Transfers the contents of the `<SRC>` register to the `<DEST>` register.
+
+**Operands**:
+
+- `<DEST>`: The destination register
+- `<SRC>`: The source register
 
 ### Compare
 **Assembly**:
@@ -319,7 +421,7 @@ Each operand must be the same type, which is specified by appending `{TYPE}`:
 AS{DIRECTION}{TYPE} <DEST> <OP1>
 ```
 
-2 directions * 2 types * 2 addressing modes: 8 total instructions.
+2 directions * 2 addressing modes: 4 total instructions.
 
 **Bit Organization**:
 
@@ -337,8 +439,8 @@ AS{DIRECTION}{TYPE} <DEST> <OP1>
 
 **Behavior**:
 
-Performs an arithmetic shift (respects the sign of the number) on `<OP1>` and 
-stores the result in `<DEST>`.
+Performs an arithmetic shift (respects the sign of the number) on `<DEST>` and 
+stores the result in `<DEST>`. Shifted by the amount specified in `<OP1>`.
 
 `<OP1>` can either be an immediate value or a register.  
 
@@ -348,13 +450,6 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 | ------------- | --------- |
 | `L`           | Left      |
 | `R`           | Right     |
-
-The type of `<OP1>` is specified by appending `{TYPE}`:
-
-| `{TYPE}` | Type             |
-| -------- | ---------------- |
-| `I`      | Signed integer   |
-| `F`      | Float            |
 
 **Operands**:
 
@@ -386,8 +481,8 @@ LS{DIRECTION} <DEST> <OP1>
 
 **Behavior**:
 
-Performs a logical shift (ignores the sign of the number) on `<OP1>` and 
-stores the result in `<DEST>`.
+Performs a logical shift (ignores the sign of the number) on `<DEST>` and 
+stores the result in `<DEST>`. The amount to shift is specified by `<OP1>`.
 
 `<OP1>` can either be an immediate value or a register.  
 
@@ -482,7 +577,6 @@ Word based operations:
 - Store ([Docs](#store))
 - Push ([Docs](#push))
 - Pop ([Docs](#pop))
-- Move ([Docs](#move))
 
 **Bit Organization**:
 
@@ -560,8 +654,8 @@ PUSH <SRC>
 
 **Behavior**:
 
-Writes the contents of the `<SRC>` register to the word below the stack pointer
-in memory (`SP - 1`). Then sets the stack pointer register to this word.
+Decrements the stack pointer and stores the contents of the `<SRC>` register 
+at the address specified by stack pointer.
 
 **Operands**:
 
@@ -590,37 +684,21 @@ into the `<DEST>` register. Then increments the stack pointer register by one.
 
 - `<DEST>`: The destination register for data being popped off stack
 
-### Move
-**Assembly**:
-```
-MV <DEST> <SRC>
-```
-
-1 total instruction.
-
-**Bit Organization**:
-
-| Condition | Type | Operation | `<DEST>` | `<SRC>`  | Not Used |
-| --------- | ---- | --------- | -------- | -------- | -------- |
-| 5         | 2    | 3         | 5        | 5        | 12       |
-
-**Behavior**:
-
-Transfers the contents of the `<SRC>` register to the `<DEST>` register.
-
-**Operands**:
-
-- `<DEST>`: The destination register
-- `<SRC>`: The source register
-
 ## Control
 1 total instruction.
 
 - Jump ([Docs](#jump))
+- Set Interrupt Handler ([Docs](#set-interrupt-handler))
+- Perform Interrupt ([Docs](#perform-interrupt))
+- Return From Interrupt ([Docs](#return-from-interrupt))
 
 **Bit Organization**:
 
-Since there is currently only 1 control instruction there is no operation field.
+The operation field of each memory instruction has the following meaning:
+
+| Binary   | Operation |
+| -------- | --------- |
+| `00`     | Jump      |
 
 ### Jump
 **Assembly**:
@@ -628,21 +706,33 @@ Since there is currently only 1 control instruction there is no operation field.
 <CONDITION>JMP <ADDR>
 ```
 
-1 total instruction.
+2 addressing modes = 2 total instructions.
 
 **Bit Organization**:
 
-| Condition | Type | `<ADDR>` | Extra |
-| --------- | ---- | -------- | ----- |
-| 5         | 2    | 5        | 22    |
+Register direct:
+
+| Condition | Type | Operation | `<ADDR>` | Extra |
+| --------- | ---- | --------- | -------- | ----- |
+| 5         | 2    | 2         | 5        | 18    |
+
+Immediate:
+
+| Condition | Type | Operation | `<ADDR>` |
+| --------- | ---- | --------- | -------- |
+| 5         | 2    | 2         | 23       |
 
 **Behavior**:
 
 Only executes if the status register matches the value specified
 by `<CONDITION>`. If no condition is specified defaults to null status (`NS`).
 
-Sets the program counter register to the value stored in the `<ADDR>` register.
+If `<ADDR>` is register direct: Sets the `PC` register to the value
+stored in the `<ADDR>` register.
+
+If `<ADDR>` is an immediate: The immediate value is added to `PC + 1` and the 
+`PC` register is set to the resulting value.
 
 **Operands**:
 
-- `<ADDR>`: Register containing new program counter value
+- `<ADDR>`: Register containing new program counter value or a 23-bit immediate
