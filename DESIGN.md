@@ -575,8 +575,6 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 Performs a logic operation on `<OP1>` and `<OP2>` and stores the result in the
 `<DEST>` register. 
 
-If `<OP2>` is an immediate value it will be padded with `0`'s to be 32 bits.
-
 The logic operation is specified by `{OPERATION}`:
 
 | `{OPERATION}` | Operation |
@@ -752,7 +750,7 @@ The operation field of each memory instruction has the following meaning:
 ### Jump
 **Assembly**:
 ```
-<CONDITION>JMP <ADDR>
+<CONDITION>JMP{SUBROUTINE?} <ADDR>
 ```
 
 2 addressing modes = 2 total instructions.
@@ -773,14 +771,27 @@ Immediate:
 
 **Behavior**:
 
-Only executes if the status register matches the value specified
-by `<CONDITION>`. If no condition is specified defaults to null status (`NS`).
+Conditionally executes a jump based on if the `<CONDITION>` operand matches the
+condition in the status register.
 
-If `<ADDR>` is register direct: Sets the `PC` register to the value
-stored in the `<ADDR>` register.
+The type of jump is determined by `{SUBROUTINE?}`:
 
-If `<ADDR>` is an immediate: The immediate value is added to `PC + 1` and the 
-`PC` register is set to the resulting value.
+| `{SUBROUTINE?}` | Behavior        |
+| --------------- | --------        |
+| `S`             | Subroutine jump |
+| `` (Empty)      | Normal jump     |
+
+A subroutine jump sets the link register to the program counter register 
+plus one. Then it performs a normal jump.
+
+A normal jump sets the program counter register to the value specified by the
+`<ADDR>` operand.
+
+In the register direct version of this instruction the program counter is set
+to the value in the `<ADDR>` register.
+
+In the immediate version of this instruction the `<ADDR>` value is added to
+the program counter and the program counter is set to the result.
 
 **Operands**:
 
