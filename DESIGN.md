@@ -24,80 +24,6 @@ does not occur.
 run integration tests on every push of our source code. We will also introduce
 regression tests whenever a bug is found.
 
-# Documentation Syntax
-## Assembly Documentation Syntax
-Instruction assembly is documented using the following syntax:
-
-- A word in curly brackets signifies a variation of an instruction's mnemonic. 
-  A table will be present which specifies valid values, the curly brackets and 
-  their contents should be replaced with one of these values.
-  - Example:  
-	```
-	DO{OPERATION}
-	```
-	
-	`{OPERATION}` indicates that part of the mnemonic must be replaced
-	by a value from the `{OPERATION}` table below.
-	
-	| `{OPERATION}` | Operation |
-	| ------------- | --------- |
-	| `F`           | Foo       |
-	| `B`           | Bar       |
-
-	For example a mnemonic of `DOF` indicates that the "Foo" operation should 
-	take place.
-- A word in angle brackets signifies an instruction operand. Look for the 
-  "operands" section of the instruction documentation for more detail.
-  - Example:  
-	```
-	DO <DEST> <OP1> <OP2>
-	```
-	
-	In the above `<DEST>`, `<OP1>`, and `<OP2`> are all operands which should be
-	replaced by operand values when writing assembly.
-
-	For example the assembly line `DO R1 R2 R3` has a `<DEST>` operand value of 
-	`R1`, a `<OP1>` operand value of `R2`, and a `<OP2>` operand value of `R3`.
-
-## Bit Organization Syntax
-Instructions have a bit organization section which details the binary format of 
-the instruction itself.  
-
-The format of this section is a table, where the top header row indicates the 
-purpose of the bits, and the box directly beneath each item in the header row
-indicates how many bits are reserved for the described purpose.
-
-The leftmost part of the table represents the least significant bits, and the
-rightmost part of the table represents the most significant bits.
-
-Example:
-
-| Type | Operation | `<DEST>` | `<OP1>` | `<OP2>` |
-| ---- | --------- | -------- | ------- | ------- |
-| 4    | 6         | 4        | 8       | 2       |
-
-Indicates that the "Type" field takes up 4 bits, the "Operation" field takes up
-6 bits, the `<DEST>` field takes up 4 bits, and so on.
-
-The binary number:
-
-```
-MSB                  LSB
-|                      |
-v                      v
-101011001011110100011001
-```
-
-Would translate to the following values for the fields defined in the example:
-
-| Field     | Value      |
-| --------- | ---------- |
-| Type      | `1001`     |
-| Operation | `010001`   |
-| `<DEST>`  | `1111`     |
-| `<OP1>`   | `10110010` |
-| `<OP2>`   | `10`       |
-
 # Fundamentals
 **Endianess**: Little  
 **Word size**: 32 bits  
@@ -279,6 +205,79 @@ The interrupt code will be stored in `R0`, valid interrupt codes are:
 | `00`              | ALU     |
 | `01`              | Memory  |
 | `10`              | Control |
+
+## Assembly Documentation Syntax
+Instruction assembly is documented using the following syntax:
+
+- A word in curly brackets signifies a variation of an instruction's mnemonic. 
+  A table will be present which specifies valid values, the curly brackets and 
+  their contents should be replaced with one of these values.
+  - Example:  
+	```
+	DO{OPERATION}
+	```
+	
+	`{OPERATION}` indicates that part of the mnemonic must be replaced
+	by a value from the `{OPERATION}` table below.
+	
+	| `{OPERATION}` | Operation |
+	| ------------- | --------- |
+	| `F`           | Foo       |
+	| `B`           | Bar       |
+
+	For example a mnemonic of `DOF` indicates that the "Foo" operation should 
+	take place.
+- A word in angle brackets signifies an instruction operand. Look for the 
+  "operands" section of the instruction documentation for more detail.
+  - Example:  
+	```
+	DO <DEST> <OP1> <OP2>
+	```
+	
+	In the above `<DEST>`, `<OP1>`, and `<OP2`> are all operands which should be
+	replaced by operand values when writing assembly.
+
+	For example the assembly line `DO R1 R2 R3` has a `<DEST>` operand value of 
+	`R1`, a `<OP1>` operand value of `R2`, and a `<OP2>` operand value of `R3`.
+
+## Bit Organization Syntax
+Instructions have a bit organization section which details the binary format of 
+the instruction itself.  
+
+The format of this section is a table, where the top header row indicates the 
+purpose of the bits, and the box directly beneath each item in the header row
+indicates how many bits are reserved for the described purpose.
+
+The leftmost part of the table represents the least significant bits, and the
+rightmost part of the table represents the most significant bits.
+
+Example:
+
+| Type | Operation | `<DEST>` | `<OP1>` | `<OP2>` |
+| ---- | --------- | -------- | ------- | ------- |
+| 4    | 6         | 4        | 8       | 2       |
+
+Indicates that the "Type" field takes up 4 bits, the "Operation" field takes up
+6 bits, the `<DEST>` field takes up 4 bits, and so on.
+
+The binary number:
+
+```
+MSB                  LSB
+|                      |
+v                      v
+101011001011110100011001
+```
+
+Would translate to the following values for the fields defined in the example:
+
+| Field     | Value      |
+| --------- | ---------- |
+| Type      | `1001`     |
+| Operation | `010001`   |
+| `<DEST>`  | `1111`     |
+| `<OP1>`   | `10110010` |
+| `<OP2>`   | `10`       |
 
 ## Arithmetic Logic Unit
 **Instructions**:
