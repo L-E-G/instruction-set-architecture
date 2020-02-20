@@ -162,7 +162,7 @@ There are also a few special status codes:
 
 | Binary  | Assembly      | Meaning                                                                                              |
 | ------  | --------      | -------------                                                                                        |
-| `01111` | `NOINTERRUPT` | Indicates an interrupt is currently being handled so no other interrupts can be handled at this time |
+| `11110` | `NOINTERRUPT` | Indicates an interrupt is currently being handled so no other interrupts can be handled at this time |
 | `11111` | `NS`          | Null status, matches any other status code                                                           |
 
 # Condition Fields
