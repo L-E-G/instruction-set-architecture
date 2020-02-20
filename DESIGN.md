@@ -1,28 +1,28 @@
+---
+geometry: margin=10px
+title: LEG
+author: Noah Huppert, Robert Scibelli
+---
 # Design
 ISA design.
 
-# Table Of Contents
-- [Documentation Syntax](#documentation-syntax)
-- [Fundamentals](#fundamentals)
-- [Types](#types)
-- [Registers](#registers)
-- [Status Codes](#status-codes)
-- [Instructions](#instructions)
-  - [Arithmetic Logic Unit](#arithmetic-logic-unit)
-	- [Add, Subtract, Divide, Multiply](#arithmetic-instructions)
-	- [Compare](#compare)
-	- [Arithmetic Shift Left / Right](#arithmetic-shift)
-	- [Logical Shift Left / Right](#logical-shift)
-	- [And, Or, Xor](#3-operand-logic)
-	- [Not](#not)
-  - [Memory](#memory)
-	- [Load](#load)
-	- [Store](#store)
-	- [Push](#push)
-	- [Pop](#pop)
-	- [Move](#move)
-  - [Control](#control)
-	- [Jump](#jump)
+# Management Plan
+**Responsibilities**: Both Noah and Robert will be working on the simulator 
+back-end and user interface.
+
+**Code management**: We have a GitHub organization and will use Git to track 
+source code. We have one repository for the design document and another for the
+simulator. We may create other repositories for future tools.
+
+**Work coordination**: We will be using GitHub issues to track and assign work. 
+Team members will claim tickets as they start working on them so duplicate work
+does not occur. 
+
+**Bug tracking**: We will use GitHub issue to track any bugs we find.
+
+**Testing**: We will use GitHub Actions (a continuous integration solution) to
+run integration tests on every push of our source code. We will also introduce
+regression tests whenever a bug is found.
 
 # Documentation Syntax
 ## Assembly Documentation Syntax
