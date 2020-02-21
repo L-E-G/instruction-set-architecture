@@ -175,6 +175,30 @@ A value of `0` means no interrupts are being handled and vise versa.
 If the interrupt flag is set no new interrupts can be handled. Any new 
 interrupts which come in will be ignored.
 
+# Interrupts
+The interrupt handler register holds the memory address for a subroutine which 
+will handle an interrupt. Initially this register is set to all 1's, which means
+the handler is unset. 
+
+The interrupt code will be stored in `R0`, valid interrupt codes are:
+
+| Binary | Assembly   | Meaning                                                |
+| ------ | ---------- | -------                                                |
+| `0`    | `KEYPRESS` | A key was pressed, the key code will be stored in `R1` |
+
+`R1` holds additional details about an interrupt, for the `KEYPRESS` interrupt
+`R1` has the following values:
+
+| Binary | Assembly     | Meaning         |
+| ------ | --------     | -------         |
+| `000`  | `UPARROW`    | Up arrow key    |
+| `001`  | `DOWNARROW`  | Down arrow key  |
+| `010`  | `LEFTARROW`  | Left arrow key  |
+| `011`  | `RIGHTARROW` | Right arrow key |
+| `100`  | `ENTER`      | Enter key       |
+| `101`  | `ESCAPE`     | Escape key      |
+| `110`  | `SPACE`      | Space key       |
+
 # Condition Fields
 All instructions currently have space for a condition field.  
 This field allows for predicated execution of instructions.  
@@ -766,7 +790,6 @@ into the `<DEST>` register. Then increments the stack pointer register by one.
 - `<DEST>`: The destination register for data being popped off stack
 
 ## Control
-1 total instruction.
 
 - Jump ([Docs](#jump))
 - Set Interrupt Handler ([Docs](#set-interrupt-handler))
@@ -813,7 +836,7 @@ The type of jump is determined by `{SUBROUTINE?}`:
 | `{SUBROUTINE?}` | Behavior        |
 | --------------- | --------        |
 | `S`             | Subroutine jump |
-| `` (Empty)      | Normal jump     |
+| `(Empty) `      | Normal jump     |
 
 A subroutine jump sets the link register to the program counter register 
 plus one. Then it performs a normal jump.
@@ -830,3 +853,67 @@ the program counter and the program counter is set to the result.
 **Operands**:
 
 - `<ADDR>`: Register containing new program counter value or a 23-bit immediate
+
+
+### Set Interrupt Handler
+The Set Interrupt Handler instruction can be used to set the interrupt flag int he status register to a 1 to prohibit any further interrupts from occurring.
+
+**Assembly**
+```
+SIH <CODE> <VAL> <ADDR>
+```
+**Bit Organization**
+| Code | Value | `<ADDR>`  | Extra |
+| ---- | ----- | --------- | ----- |
+| 1    | 3     | 5         | 23    |
+
+This operation doesn't require any further data to perform, this is all routine instructions that has to happen with any interrupt.
+
+Operations that need to happen:
+- Check if status register is set to `NOINTERRUPT`, if it is exit the 
+  instruction, otherwise continue.
+- If the interrupt handler register is set to all 1's the interrupt handler is 
+  not set, exits the instruction.
+- Sets the status register to `NOINTERRUPT`
+- Registers `R0`, `R1`, and `STS` will be pushed to the stack
+- Sets the link register to the where program counter was before the interrupt
+  came in
+- Jump to the interrupt handler
+
+Code: represents the interrupt code that the interrupt handler will be handling
+Value: represents the type of interrupt that the handler will be handling
+`<ADDR>` represents the subrouting that the interrupt handler will be handling
+
+### Perform Interrupt
+**Assembly**
+```
+INT <CODE> <VAL> <ADDR>
+```
+**Bit Organization**
+| Code | Value | `<ADDR>`  | Extra |
+| ---- | ----- | --------- | ----- |
+| 1    | 3     | 5         | 23    |
+
+Code: represents the interrupt code that the interrupt handler will be handling
+Value: represents the type of interrupt that the handler will be handling
+`<ADDR>` represents the subrouting that the interrupt handler will be handling
+
+After the interrupt handler is done it must call:
+
+### Return From Interrupt
+**Assembly**
+```
+RFI <ADDR>
+```
+**Bit Organization**
+| `<ADDR>`  | Extra |
+| --------- | ----- |
+| 5         | 27    |
+
+After the interrupt handler is done it must call this instruction to perform the following:
+
+- Pops registers `R0`, `R1`, and `STS`
+- Set Interrupt flag to 0
+- Jumps to the address in the link register
+
+`<ADDR>` represents the subrouting that the interrupt handler will be handling
