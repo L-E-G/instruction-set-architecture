@@ -60,7 +60,7 @@ exclusively through custom instructions:
 
 All graphics memory shares these underlying properties:  
 
-**Word Size**: 8 bits
+**Word Size**: 8 bits  
 **Addressing Unit**: Word
 
 Pixel organization in memory:
@@ -115,6 +115,19 @@ Its purpose is to quickly transfer bits while performing a basic logic operation
 from the sprite library memory to the secondary frame buffer.
 
 In the documentation this will be referred to as the "Blitter".
+
+## Blitter Registers
+The Blitter has 4 registers which it uses internally to determine how to 
+transfer data.  
+
+- Source: 12-bit address in sprite library memory marking the start of a sprite
+- Destination: 16-bit address in secondary frame buffer memory to start copying
+  sprite to
+- Width: 7-bit width of sprite
+- Height: 7-bit width of sprite
+
+These registers cannot be read by any component other than the Blitter.  
+They can only be set via graphics instructions.
 
 ## Blitter Operations
 The Blitter can perform many different logical operations on the source against
