@@ -32,12 +32,12 @@ regression tests whenever a bug is found.
 The architecture memory is broken in to 2 parts:
 
 - Data and instructions
-- Frame buffer
+- Graphics
 
 ## Data and Instruction Memory
 **Word Size**: 32 bits  
 **Addressing Unit**: Word  
-**Address Space**: 2^32  
+**Address Space**: $2^{32}$  
 
 Holds data and instructions. Can be manipulated directly via the load and 
 store instructions.  
@@ -49,24 +49,97 @@ store instructions.
 3. Level 3: 8 MB, direct mapped, 64 byte / line (38 cycle delay)
 4. DRAM: $^32 \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
 
-## Frame Buffer Memory
+## Graphics Memory
+The graphics memory is composed of level 2 (11 cycle delay) technology.  
+
+There are two main pieces of graphics memory which are interacted with 
+exclusively through custom instructions:
+
+- Active and secondary frame buffer
+- Sprite library
+
+All graphics memory shares these underlying properties:  
+
 **Word Size**: 8 bits
 **Addressing Unit**: Word
-**Address Space**: 2^16  
+
+Pixel organization in memory:
+
+8 bit pixels: 3 red, 3 green, 2 blue.  
+
+The first pixel defines the top left pixel in a display, the last pixel the 
+bottom right pixel in a display.  
+
+The width of the thing being displayed determines how many bytes there are
+per line. 
+
+### Frame Buffers
+2 frame buffers, 1 active, 1 secondary.  
+
+**Address Space / Frame Buffer**: $2^{16}$  
 
 Holds pixels to be displayed to the user on a screen.  
 Screen size is 256 x 256 pixels.  
-Each pixel has a color depth of 8 bits.  
 
-There is an active frame buffer which is displayed and a secondary frame buffer
-where changes are made. They can be flipped so the secondary is the active and 
-the old active is now the secondary.
+The active frame buffer is displayed on the screen.  
+The secondary frame buffer prepares the next frame to be displayed.  
+When the next frame is ready the frame buffers are swapped, and the old active 
+becomes the secondary while the old secondary becomes the active.
 
 Can only be manipulated by graphics instructions.
 
 **Memory Hierarchy**:
 
-1. Level 2: 128 KB, direct mapped, 64 bytes / line (11 cycle delay)
+1. SRAM: 128 KB (11 cycle delay)
+
+### Sprite Library
+A piece of memory designed to hold sprites so they can be operated on in a 
+quick fashion.
+
+**Address Space**: $2^{12}$  
+
+This memory can hold up to 1 128x64 or 64x128 sprite, or several 
+smaller sprites. 
+
+**Memory Hierarchy**:
+
+1. SRAM: 8 KB (11 cycle delay)
+
+# Sprite Processing Unit (Blitter)
+On top of including an arithmetic logic unit the architecture includes a 
+specialized sprite processing unit.
+
+This unit is inspired by the [Atari ST BLITTER chip](http://www.atari-wiki.com/index.php/Blitter_manual).  
+
+Its purpose is to quickly transfer bits while performing a basic logic operation
+from the sprite library memory to the secondary frame buffer.
+
+In the documentation this will be referred to as the "Blitter".
+
+## Blitter Operations
+The Blitter can perform many different logical operations on the source against
+the destination and store the result:
+
+| Binary | Operation      |
+| ------ | -------------- |
+| `0000` | All zeros      |
+| `0001` | `SRC & DEST`   |
+| `0010` | `SRC & ~DEST`  |
+| `0011` | `SRC`          |
+| `0100` | `~SRC & DEST`  |
+| `0101` | `DEST`         |
+| `0110` | `SRC ^ DEST`   |
+| `0111` | `SRC | DEST`   |
+| `1000` | `~SRC & ~DEST` |
+| `1001` | `~SRC ^ DEST`  |
+| `1010` | `~DEST`        |
+| `1011` | `SRC | ~DEST`  |
+| `1100` | `~SRC`         |
+| `1101` | `~SRC | DEST`  |
+| `1110` | `~SRC | ~DEST` |
+| `1111` | All ones       |
+
+(These are the exact same operations the Atari Blitter supported)
 
 # Types
 
@@ -234,11 +307,12 @@ The interrupt code will be stored in `R0`, valid interrupt codes are:
 # Instructions
 3 instruction types:
 
-| Type Field Binary | Type    |
-| ----------------- | ------- |
-| `00`              | ALU     |
-| `01`              | Memory  |
-| `10`              | Control |
+| Type Field Binary | Type     |
+| ----------------- | -------  |
+| `00`              | ALU      |
+| `01`              | Memory   |
+| `10`              | Control  |
+| `11`              | Graphics |
 
 ## Assembly Documentation Syntax
 Instruction assembly is documented using the following syntax:
@@ -348,6 +422,8 @@ Untyped general instructions:
 **Bit Organization**:
 
 The operation field of each ALU instruction has the following meaning:
+
+TODO: Update ALU operation table
 
 | Binary   | Operation                                             |
 | -------  | -------------                                         |
@@ -663,6 +739,8 @@ Word based operations:
 
 The operation field of each memory instruction has the following meaning:
 
+TODO: Update memory operation table + check size of operation field (could be 4 now)
+
 | Binary   | Operation |
 | -------- | --------- |
 | `000`    | Load      |
@@ -779,7 +857,8 @@ The operation field of each memory instruction has the following meaning:
 
 | Binary   | Operation |
 | -------- | --------- |
-| `00`     | Jump      |
+
+TODO: Update control operation table
 
 ### Jump
 **Assembly**:
@@ -830,3 +909,195 @@ the program counter and the program counter is set to the result.
 **Operands**:
 
 - `<ADDR>`: Register containing new program counter value or a 23-bit immediate
+
+## Graphics
+8 total instructions.
+
+- Swap Frame Buffers ([Docs](#swap-frame-buffers))
+- Load Sprite ([Docs](#load-sprite))
+- Set Bit Block Transfer Memory ([Docs](#set-bit-block-transfer-memory))
+- Set Bit Block Transfer Dimensions ([Docs](#set-bit-block-transfer-dimensions))
+- Bit Block Transfer ([Docs](#bit-block-transfer))
+
+**Bit Organization**:  
+
+The operation field of each graphics instruction has the following meaning:
+
+| Binary | Meaning            |
+| ------ | -------            |
+
+TODO: Update graphics operation table
+
+
+### Swap Frame Buffers
+**Assembly**:  
+```
+GSWAP
+```
+
+1 total instruction.
+
+**Bit Organization**:
+
+| Condition | Type | Operation | Extra |
+| --------- | ---- | --------- | ----- |
+| 5         | 2    | 3         | 22    |
+
+**Behavior**:  
+
+Toggles an internal bit in the chip (ie simulator) which indicates which buffer
+is the active frame buffer and which buffer is the secondary frame buffer.  
+
+No copying of memory takes place.
+
+**Operands**:  
+None
+
+### Load Sprite
+**Assembly**:  
+```
+GLOD <DEST> <SRC> <LEN>
+```
+
+2 addressing modes = 2 total instructions.
+
+**Bit Organization**:  
+
+Register direct:
+
+| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Extra |
+| --------- | ---- | --------- | -------- | ------- | ------- | ----- |
+| 5         | 2    | 3         | 5        | 5       | 5       | 19    |
+
+Immediate:
+
+| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` |
+| --------- | ---- | --------- | -------- | ------- | ------- |
+| 5         | 2    | 3         | 12       | 10      | 12      |
+
+**Behavior**:  
+
+Copies a sprite of length `<LEN>` bytes from `<SRC>` in main memory to 
+`<DEST>` in the sprite library memory.
+
+Both `<DEST>` and `<SRC>` are the start address of the sprite.  
+The memory region `SRC + CEILING(LEN / 4)` is copied from main memory 
+to the region `DEST + LEN` in sprite library memory.  
+
+It should be noted that `<DEST>` is an address in the sprite library memory's 
+8-bit word address space, and `<SRC>` is an address in the main memory's 32-bit 
+word address space.
+
+**Operands**:  
+
+- `<DEST>`: 12-bit immediate or first 12 least significant bits of a register 
+  indicating the address in the sprite library memory to start copying to
+- `<SRC>`: 10-bit signed integer added to the program counter or register 
+  holding the start address in main memory of the sprite
+- `<LEN>`: 12-bit immediate or first 12 least significant bits of a register
+  indicating the length of the sprite in bytes
+
+### Set Bit Block Transfer Memory
+**Assembly**:  
+```
+BLITMEM <SRC> <DEST>
+```
+
+1 addressing mode = 1 total instruction.
+
+**Bit Organization**:  
+
+| Condition | Type | Operation | `<SRC>` | `<DEST>` | Extra |
+| --------- | ---- | --------- | ------- | -------- | ----- |
+| 5         | 2    | 3         | 5       | 5        | 12    |
+
+**Behavior**:  
+
+Sets the internal sprite library memory source address register of the Blitter
+to the first 12 bits contained in the `<SRC>` register. 
+
+Sets the secondary frame buffer destination register of the Blitter to the 
+first 16 bits contained in the `<DEST>` register.
+
+**Operands**:  
+
+- `<SRC>`: Register who's first 12 least significant bits are an address to a
+  sprite's start in the sprite library memory.
+- `<DEST>`: Register who's first 16 least significant bits are an address to the
+  start location in the secondary frame buffer.
+
+### Set Bit Block Transfer Dimensions
+**Assembly**:  
+```
+BLITDIMS <WIDTH> <HEIGHT>
+```
+
+2 addressing modes = 2 total instructions.
+
+**Bit Organization**:  
+
+Register direct:  
+
+| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Extra |
+| --------- | ---- | --------- | --------- | ---------- | ----- |
+| 5         | 2    | 3         | 5         | 5          | 12    |
+
+Immediate:  
+
+| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Extra |
+| --------- | ---- | --------- | --------- | ---------- | ----- |
+| 5         | 2    | 3         | 7         | 7          | 8     |
+
+**Behavior**:  
+
+Sets the internal width and height registers of the Blitter to the values 
+specified by the `<WIDTH>` and `<HEIGHT>` operands.
+
+**Operands**: 
+
+- `<WIDTH>`: 7-bit immediate value or register who's first 7 least significant
+  bits will be used as the Blitter's width value
+- `<HEIGHT>`: 7-bit immediate value or register who's first 7 least significant
+  bits will be used as the Blitter's height value
+
+### Bit Block Transfer
+**Assembly**:  
+```
+BLIT <OP> <DEST MASK>
+```
+
+2 addressing modes = 2 total instructions.
+
+**Bit Organization**:  
+
+Register direct:  
+
+| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Extra |
+| --------- | ---- | --------- | ----------- | ------------- | ----- |
+| 5         | 2    | 3         | 5           | 5             | 12    |
+
+Immediate:  
+
+| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Extra |
+| --------- | ---- | --------- | ----------- | ------------- | ----- |
+| 5         | 2    | 3         | 4           | 8             | 10    |
+
+**Behavior**:  
+
+Executes a bit block transfer operation using the Blitter.  
+
+The Blitter operation which takes place is specified by the `<BLIT OP>` 
+operand. See the [Blitter Operations](#blitter-operations) for valid 
+operation codes.
+
+The `<DEST MASK>` is an 8-bit and-style-mask which will be applied to the bits
+of each pixel after it has been run through the Blitter operation and before it 
+is copied to the destination.
+
+**Operands**:  
+
+- `<BLIT OP>`: 4-bit immediate value or first 4 least significant bits of a
+  register determining which Blitter operation to perform, see 
+  [Blitter Operations](#blitter-operations)
+- `<DEST MASK>`: 8-bit immediate value or first 8 least significant bits of a
+  register which will be used as an and-style-mask on pixels
