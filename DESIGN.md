@@ -1177,6 +1177,6 @@ is copied to the destination.
 
 - `<BLIT OP>`: 4-bit immediate value or first 4 least significant bits of a
   register determining which Blitter operation to perform, see 
-  [Blitter Operations](#blitter-operations)
+  [Blitter Operations section](#blitter-operations)
 - `<DEST MASK>`: 8-bit immediate value or first 8 least significant bits of a
   register which will be used as an and-style-mask on pixels
