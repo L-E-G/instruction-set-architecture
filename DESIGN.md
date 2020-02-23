@@ -64,18 +64,18 @@ store instructions.
 
 **Memory Hierarchy**:  
 
-1. Level 1: 64 KB, 4-way associative, 64 bytes / line (4 cycle delay)
-2. Level 2: 256 KB, direct mapped, 64 byte / line (11 cycle delay)
-3. Level 3: 8 MB, direct mapped, 64 byte / line (38 cycle delay)
+1. Level 1, SRAM: 64 KB, 4-way associative, 64 bytes / line (4 cycle delay)
+2. Level 2, SRAM: 256 KB, direct mapped, 64 byte / line (11 cycle delay)
+3. Level 3, SRAM: 8 MB, direct mapped, 64 byte / line (38 cycle delay)
 4. DRAM: $^32 \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
 
 ## Graphics Memory
-The graphics memory is composed of level 2 (11 cycle delay) technology.  
+The graphics memory is composed of SRAM (11 cycle delay).
 
 There are two main pieces of graphics memory which are interacted with 
 exclusively through custom instructions:
 
-- Active and secondary frame buffer
+- Frame buffer
 - Sprite library
 
 All graphics memory shares these underlying properties:  
@@ -93,24 +93,17 @@ bottom right pixel in a display.
 The width of the thing being displayed determines how many bytes there are
 per line. 
 
-### Frame Buffers
-2 frame buffers, 1 active, 1 secondary.  
-
-**Address Space / Frame Buffer**: $2^{16}$  
+### Frame Buffer
+**Address Space**: $2^{16}$  
 
 Holds pixels to be displayed to the user on a screen.  
 Screen size is 256 x 256 pixels.  
-
-The active frame buffer is displayed on the screen.  
-The secondary frame buffer prepares the next frame to be displayed.  
-When the next frame is ready the frame buffers are swapped, and the old active 
-becomes the secondary while the old secondary becomes the active.
 
 Can only be manipulated by graphics instructions.
 
 **Memory Hierarchy**:
 
-1. SRAM: 128 KB (11 cycle delay)
+1. SRAM: 64 KB (4 cycle delay)
 
 ### Sprite Library
 A piece of memory designed to hold sprites so they can be operated on in a 
@@ -302,11 +295,11 @@ set this register.
 
 The [Perform Interrupt](#perform-interrupt) instruction performs the following:
 
-- Check if status register is set to `NOINTERRUPT`, if it is exit the 
+- Check if status register interrupt flag is set, if it is exit the 
   instruction, otherwise continue.
 - If the interrupt handler register is set to all 1's the interrupt handler is 
   not set, exits the instruction.
-- Sets the status register to `NOINTERRUPT`
+- Sets the status register interrupt flag
 - Registers `R0`, `R1`, and `STS` will be pushed to the stack
 - Sets the link register to the where program counter was before the interrupt
   came in
@@ -316,6 +309,7 @@ After the interrupt handler is done it must call
 [Return From Interrupt](#return-from-interrupt) which does the following:
 
 - Pops registers `R0`, `R1`, and `STS`
+- Unset status register interrupt flag
 - Jumps to the address in the link register
 
 The interrupt code will be stored in `R0`, valid interrupt codes are:
