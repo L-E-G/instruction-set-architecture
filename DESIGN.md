@@ -165,13 +165,7 @@ the destination and store the result:
 | `1110` | `~SRC | ~DEST` |
 | `1111` | All ones       |
 
-(These are the exact same operations the Atari Blitter supported)
-
-# Types
-
-- 32 bit two's complement integer
-- 32 bit unsigned integer
-- 32 bit IEEE 754 float
+(These are the same operations the Atari Blitter supported)
 
 # Registers
 Referred to in assembly as `R#` where `#` is a number.  
@@ -274,17 +268,6 @@ A value of `0` means no interrupts are being handled and vise versa.
 If the interrupt flag is set no new interrupts can be handled. Any new 
 interrupts which come in will be ignored.
 
-# Condition Fields
-All instructions currently have space for a condition field.  
-This field allows for predicated execution of instructions.  
-Currently only the jump instructions use this condition field.  
-
-All other instructions do not use this field at the moment, in the future they
-may. For right now the condition field will be set to null status.
-
-# Immediate Fields
-All immediate fields in instructions will be sign extended to 32-bits.
-
 # Interrupts
 The interrupt handler register holds the memory address for a subroutine which 
 will handle an interrupt. Initially this register is set to all 1's, which means
@@ -332,14 +315,30 @@ The interrupt code will be stored in `R0`, valid interrupt codes are:
 | `110`  | `SPACE`      | Space key       |
 
 # Instructions
-3 instruction types:
+## Types
+There are 3 data types which are supported in instructions:  
 
-| Type Field Binary | Type     |
-| ----------------- | -------  |
-| `00`              | ALU      |
-| `01`              | Memory   |
-| `10`              | Control  |
-| `11`              | Graphics |
+- 32 bit two's complement integer
+- 32 bit unsigned integer
+- 32 bit IEEE 754 float
+
+Instructions have type variations when it matters, bit level operations do not.
+
+## Condition Fields
+All instructions currently have space for a condition field.  
+
+This field allows for predicated execution of instructions.  
+
+Currently only the jump instructions use this condition field.  
+
+All other instructions do not use this field at the moment, in the future they
+may. For right now the condition field will be set to null status.
+
+## Immediate Fields
+Most immediate fields in instructions will be sign extended to 32-bits.  
+
+There are a few instructions where this is not the case, in these instructions 
+this exception is noted.
 
 ## Assembly Documentation Syntax
 Instruction assembly is documented using the following syntax:
@@ -413,6 +412,16 @@ Would translate to the following values for the fields defined in the example:
 | `<DEST>`  | `1111`     |
 | `<OP1>`   | `10110010` |
 | `<OP2>`   | `10`       |
+
+## Instruction Type Field
+There are 3 instruction types:
+
+| Type Field Binary | Type     |
+| ----------------- | -------  |
+| `00`              | ALU      |
+| `01`              | Memory   |
+| `10`              | Control  |
+| `11`              | Graphics |
 
 ## Arithmetic Logic Unit
 **Instructions**:
