@@ -119,13 +119,12 @@ smaller sprites.
 1. SRAM: 8 KB (11 cycle delay)
 
 # Sprite Processing Unit (Blitter)
-On top of including an arithmetic logic unit the architecture includes a 
-specialized sprite processing unit.
+The architecture includes a specialized sprite processing unit.
 
 This unit is inspired by the [Atari ST BLITTER chip](http://www.atari-wiki.com/index.php/Blitter_manual).  
 
 Its purpose is to quickly transfer bits while performing a basic logic operation
-from the sprite library memory to the secondary frame buffer.
+from the sprite library memory to the frame buffer.
 
 In the documentation this will be referred to as the "Blitter".
 
@@ -134,8 +133,7 @@ The Blitter has 4 registers which it uses internally to determine how to
 transfer data.  
 
 - Source: 12-bit address in sprite library memory marking the start of a sprite
-- Destination: 16-bit address in secondary frame buffer memory to start copying
-  sprite to
+- Destination: 16-bit address in frame buffer memory to start copying sprite to
 - Width: 7-bit width of sprite
 - Height: 7-bit width of sprite
 
@@ -1026,15 +1024,15 @@ BLITMEM <SRC> <DEST>
 Sets the internal sprite library memory source address register of the Blitter
 to the first 12 bits contained in the `<SRC>` register. 
 
-Sets the secondary frame buffer destination register of the Blitter to the 
-first 16 bits contained in the `<DEST>` register.
+Sets the frame buffer destination register of the Blitter to the first 16 bits 
+contained in the `<DEST>` register.
 
 **Operands**:  
 
 - `<SRC>`: Register who's first 12 least significant bits are an address to a
   sprite's start in the sprite library memory.
 - `<DEST>`: Register who's first 16 least significant bits are an address to the
-  start location in the secondary frame buffer.
+  start location in the frame buffer.
 
 ### Set Bit Block Transfer Dimensions
 **Assembly**:  
@@ -1097,7 +1095,7 @@ Immediate:
 Executes a bit block transfer operation using the Blitter.  
 
 The Blitter operation which takes place is specified by the `<BLIT OP>` 
-operand. See the [Blitter Operations](#blitter-operations) for valid 
+operand. See the [Blitter Operations section](#blitter-operations) for valid 
 operation codes.
 
 The `<DEST MASK>` is an 8-bit and-style-mask which will be applied to the bits
