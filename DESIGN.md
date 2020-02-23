@@ -2,7 +2,8 @@
 geometry: margin=1in
 documentclass: report
 title: LEG
-author: Noah Huppert, Robert Scibelli
+subtitle: Logic, Execution, and Graphics RISC Architecture
+author: Noah Huppert and Robert Scibelli
 header-includes: \pagenumbering{arabic}
 ---
 # Management Plan
