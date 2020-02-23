@@ -949,7 +949,6 @@ the program counter and the program counter is set to the result.
 ## Graphics
 8 total instructions.
 
-- Swap Frame Buffers ([Docs](#swap-frame-buffers))
 - Load Sprite ([Docs](#load-sprite))
 - Set Bit Block Transfer Memory ([Docs](#set-bit-block-transfer-memory))
 - Set Bit Block Transfer Dimensions ([Docs](#set-bit-block-transfer-dimensions))
@@ -963,31 +962,6 @@ The operation field of each graphics instruction has the following meaning:
 | ------ | -------            |
 
 TODO: Update graphics operation table
-
-
-### Swap Frame Buffers
-**Assembly**:  
-```
-GSWAP
-```
-
-1 total instruction.
-
-**Bit Organization**:
-
-| Condition | Type | Operation | Extra |
-| --------- | ---- | --------- | ----- |
-| 5         | 2    | 3         | 22    |
-
-**Behavior**:  
-
-Toggles an internal bit in the chip (ie simulator) which indicates which buffer
-is the active frame buffer and which buffer is the secondary frame buffer.  
-
-No copying of memory takes place.
-
-**Operands**:  
-None
 
 ### Load Sprite
 **Assembly**:  
