@@ -305,7 +305,7 @@ Instruction assembly is documented using the following syntax:
 
 - A word in curly brackets signifies a variation of an instruction's mnemonic. 
   A table will be present which specifies valid values, the curly brackets and 
-  their contents should be replaced with one of these values.
+  their contents should be replaced with one of these values.  
   - Example:  
 	```
 	DO{OPERATION}
@@ -372,6 +372,22 @@ Would translate to the following values for the fields defined in the example:
 | `<DEST>`  | `1111`     |
 | `<OP1>`   | `10110010` |
 | `<OP2>`   | `10`       |
+
+## Optional Parameters
+Sometimes instructions have optional parameters. These parameters are specified
+by putting them inside square brackets. If this is the case the behavior if the
+parameter is not provided is documented below.
+
+Example:
+
+The instruction documentation:
+
+```
+FOO[{TYPE}] <OP1>
+```
+
+Indicates that the `{TYPE}` parameter is optional. However the `<OP1>` operand 
+is still required.
 
 ## Data Types
 There are 3 data types which are supported in instructions:  
@@ -567,7 +583,7 @@ Transfers the contents of the `<SRC>` register to the `<DEST>` register.
 **Assembly**:
 
 ```
-CMP{TYPE} <OP1> <OP2>
+CMP[{TYPE}] <OP1> <OP2>
 ```
 
 3 types = 3 total instructions.
@@ -589,6 +605,9 @@ Each operand must be the same type, which is specified by appending `{TYPE}`:
 | `UI`     | Unsigned integer |
 | `SI`     | Signed integer   |
 | `F`      | Float            |
+
+If `{TYPE}` is not specified the assembler will default to 
+`{TYPE} = Unsigned integer` since this is equivalent to a bit wise compare.
 
 **Operands**:
 
