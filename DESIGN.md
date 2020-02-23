@@ -3,6 +3,7 @@ geometry: margin=1in
 documentclass: report
 title: LEG
 author: Noah Huppert, Robert Scibelli
+header-includes: \pagenumbering{arabic}
 ---
 # Design
 ISA design.
