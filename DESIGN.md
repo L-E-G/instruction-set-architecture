@@ -7,14 +7,14 @@ header-includes: \pagenumbering{arabic}
 ---
 # Management Plan
 ## Responsibilities
-Team members will be generalists, working on all parts of the instruction set 
-implementation. 
+Team members will act as generalists, working on all parts of the instruction 
+set implementation. 
 
 This will give team members an opportunity to learn about writing simulator 
-code, developing user interfacing, and creating tooling.
+code, developing user interfaces, and creating tooling.
 
 ## Code Management
-Git will be used to track source code.  
+Git will be used to track changes to source code.  
 
 Code will be synchronized through GitHub repositories which are owned by a 
 shared GitHub organization.
@@ -47,7 +47,7 @@ does not occur again.
 
 # Memory
 **Endianess**: Little  
-**Memory organization**: Harvard
+**Memory Organization**: Harvard
 
 Memory is broken in to 2 parts:
 
@@ -67,7 +67,7 @@ store instructions.
 1. Level 1, SRAM: 64 KB, 4-way associative, 64 bytes / line (4 cycle delay)
 2. Level 2, SRAM: 256 KB, direct mapped, 64 byte / line (11 cycle delay)
 3. Level 3, SRAM: 8 MB, direct mapped, 64 byte / line (38 cycle delay)
-4. DRAM: $^32 \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
+4. DRAM: $2^{32} \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
 
 ## Graphics Memory
 The graphics memory is composed of SRAM.
@@ -123,8 +123,8 @@ The architecture includes a specialized sprite processing unit.
 
 This unit is inspired by the [Atari ST BLITTER chip](http://www.atari-wiki.com/index.php/Blitter_manual).  
 
-Its purpose is to quickly transfer bits while performing a basic logic operation
-from the sprite library memory to the frame buffer.
+Its purpose is to quickly transfer bits from the sprite library memory to the 
+frame buffer, while performing basic logic operations along the way.
 
 In the documentation this will be referred to as the "Blitter".
 
