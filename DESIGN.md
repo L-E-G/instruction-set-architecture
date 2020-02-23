@@ -914,9 +914,9 @@ TODO: Update control operation table
 
 Register direct:
 
-| Condition | Type | Operation | `<ADDR>` | Extra |
-| --------- | ---- | --------- | -------- | ----- |
-| 5         | 2    | 2         | 5        | 18    |
+| Condition | Type | Operation | `<ADDR>` | Not Used |
+| --------- | ---- | --------- | -------- | -------- |
+| 5         | 2    | 2         | 5        | 18       |
 
 Immediate:
 
@@ -960,9 +960,9 @@ The Set Interrupt Handler instruction can be used to set the interrupt flag int 
 SIH <CODE> <VAL> <ADDR>
 ```
 **Bit Organization**
-| Code | Value | `<ADDR>`  | Extra |
-| ---- | ----- | --------- | ----- |
-| 1    | 3     | 5         | 23    |
+| Code | Value | `<ADDR>`  | Not Used |
+| ---- | ----- | --------- | -------- |
+| 1    | 3     | 5         | 23       |
 
 This operation doesn't require any further data to perform, this is all routine instructions that has to happen with any interrupt.
 
@@ -987,9 +987,9 @@ Value: represents the type of interrupt that the handler will be handling
 INT <CODE> <VAL> <ADDR>
 ```
 **Bit Organization**
-| Code | Value | `<ADDR>`  | Extra |
-| ---- | ----- | --------- | ----- |
-| 1    | 3     | 5         | 23    |
+| Code | Value | `<ADDR>`  | Not Used |
+| ---- | ----- | --------- | -------- |
+| 1    | 3     | 5         | 23       |
 
 Code: represents the interrupt code that the interrupt handler will be handling
 Value: represents the type of interrupt that the handler will be handling
@@ -1003,9 +1003,9 @@ After the interrupt handler is done it must call:
 RFI <ADDR>
 ```
 **Bit Organization**
-| `<ADDR>`  | Extra |
-| --------- | ----- |
-| 5         | 27    |
+| `<ADDR>`  | Not Used |
+| --------- | -------- |
+| 5         | 27       |
 
 After the interrupt handler is done it must call this instruction to perform the following:
 
@@ -1044,9 +1044,9 @@ GLOD <DEST> <SRC> <LEN>
 
 Register direct:
 
-| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Extra |
-| --------- | ---- | --------- | -------- | ------- | ------- | ----- |
-| 5         | 2    | 3         | 5        | 5       | 5       | 19    |
+| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Not Used |
+| --------- | ---- | --------- | -------- | ------- | ------- | -------- |
+| 5         | 2    | 3         | 5        | 5       | 5       | 19       |
 
 Immediate:
 
@@ -1086,9 +1086,9 @@ BLITMEM <SRC> <DEST>
 
 **Bit Organization**:  
 
-| Condition | Type | Operation | `<SRC>` | `<DEST>` | Extra |
-| --------- | ---- | --------- | ------- | -------- | ----- |
-| 5         | 2    | 3         | 5       | 5        | 12    |
+| Condition | Type | Operation | `<SRC>` | `<DEST>` | Not Used |
+| --------- | ---- | --------- | ------- | -------- | -------- |
+| 5         | 2    | 3         | 5       | 5        | 12       |
 
 **Behavior**:  
 
@@ -1117,15 +1117,15 @@ BLITDIMS <WIDTH> <HEIGHT>
 
 Register direct:  
 
-| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Extra |
-| --------- | ---- | --------- | --------- | ---------- | ----- |
-| 5         | 2    | 3         | 5         | 5          | 12    |
+| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
+| --------- | ---- | --------- | --------- | ---------- | -------- |
+| 5         | 2    | 3         | 5         | 5          | 12       |
 
 Immediate:  
 
-| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Extra |
-| --------- | ---- | --------- | --------- | ---------- | ----- |
-| 5         | 2    | 3         | 7         | 7          | 8     |
+| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
+| --------- | ---- | --------- | --------- | ---------- | -------- |
+| 5         | 2    | 3         | 7         | 7          | 8        |
 
 **Behavior**:  
 
@@ -1151,15 +1151,15 @@ BLIT <OP> <DEST MASK>
 
 Register direct:  
 
-| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Extra |
-| --------- | ---- | --------- | ----------- | ------------- | ----- |
-| 5         | 2    | 3         | 5           | 5             | 12    |
+| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
+| --------- | ---- | --------- | ----------- | ------------- | -------- |
+| 5         | 2    | 3         | 5           | 5             | 12       |
 
 Immediate:  
 
-| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Extra |
-| --------- | ---- | --------- | ----------- | ------------- | ----- |
-| 5         | 2    | 3         | 4           | 8             | 10    |
+| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
+| --------- | ---- | --------- | ----------- | ------------- | -------- |
+| 5         | 2    | 3         | 4           | 8             | 10       |
 
 **Behavior**:  
 
