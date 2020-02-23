@@ -7,7 +7,7 @@ Instruction set Architecture design.
 # Overview
 See [`DESIGN.md`](./DESIGN.md).
 
-To build a PDF run: 
+To build `DESIGN.pdf` run: 
 
 ```
 make
