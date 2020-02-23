@@ -905,7 +905,7 @@ TODO: Update control operation table
 ### Jump
 **Assembly**:
 ```
-<CONDITION>JMP{SUBROUTINE?} <ADDR>
+<CONDITION>JMP{IS_SUBROUTINE} <ADDR>
 ```
 
 2 addressing modes = 2 total instructions.
@@ -929,12 +929,12 @@ Immediate:
 Conditionally executes a jump based on if the `<CONDITION>` operand matches the
 condition in the status register.
 
-The type of jump is determined by `{SUBROUTINE?}`:
+The type of jump is determined by `{IS_SUBROUTINE}`:
 
-| `{SUBROUTINE?}` | Behavior        |
-| --------------- | --------        |
-| `S`             | Subroutine jump |
-| `(Empty) `      | Normal jump     |
+| `{IS_SUBROUTINE}` | Behavior        |
+| ----------------- | --------        |
+| `S`               | Subroutine jump |
+| `(Empty) `        | Normal jump     |
 
 A subroutine jump sets the link register to the program counter register 
 plus one. Then it performs a normal jump.
