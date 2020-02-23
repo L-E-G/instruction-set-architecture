@@ -464,49 +464,61 @@ Untyped general instructions:
 
 The operation field of each ALU instruction has the following meaning:
 
-TODO: Update ALU operation table
-
 | Binary   | Operation                                             |
 | -------  | -------------                                         |
-| `000001` | Add unsigned integer                                  |
-| `000010` | Add signed integer                                    |
-| `000011` | Add float                                             |
-| `000100` | Subtract unsigned integer                             |
-| `000101` | Subtract signed integer                               |
-| `000110` | Subtract float                                        |
-| `000111` | Divide unsigned integer                               |
-| `001000` | Divide signed integer                                 |
-| `001001` | Divide float                                          |
-| `001010` | Multiply unsigned integer                             |
-| `001011` | Multiply signed integer                               |
-| `001100` | Multiply float                                        |
+| `000001` | Add unsigned integer register direct                  |
+| `000010` | Add signed integer register direct                    |
+| `000011` | Add float register direct                             |
+| `000100` | Add unsigned integer immediate                        |
+| `000101` | Add signed integer immediate                          |
+| `000110` | Add float immediate                                   |
+| `000111` | Subtract unsigned integer register direct             |
+| `001000` | Subtract signed integer register direct               |
+| `001001` | Subtract float register direct                        |
+| `001010` | Subtract unsigned integer immediate                   |
+| `001011` | Subtract signed integer immediate                     |
+| `001100` | Subtract float immediate                              |
+| `001101` | Divide unsigned integer register direct               |
+| `001110` | Divide signed integer register direct                 |
+| `001111` | Divide float register direct                          |
+| `010000` | Divide unsigned integer immediate                     |
+| `010001` | Divide signed integer immediate                       |
+| `010010` | Divide float immediate                                |
+| `010011` | Multiply unsigned integer register direct             |
+| `010100` | Multiply signed integer register direct               |
+| `010101` | Multiply float register direct                        |
+| `010110` | Multiply unsigned integer immediate                   |
+| `010111` | Multiply signed integer immediate                     |
+| `011000` | Multiply float immediate                              |
 | -        | -                                                     |
-| `001101` | Compare unsigned integer                              |
-| `001110` | Compare signed integer                                |
-| `001111` | Compare float                                         |
+| `011001` | Compare unsigned integer                              |
+| `011010` | Compare signed integer                                |
+| `011011` | Compare float                                         |
 | -        | -                                                     |
-| `010000` | Arithmetic shift left signed integer register direct  |
-| `010001` | Arithmetic shift left float register direct           |
-| `010010` | Arithmetic shift right signed integer register direct |
-| `010011` | Arithmetic shift right float register direct          |
-| `010100` | Arithmetic shift left signed integer immediate        |
-| `010101` | Arithmetic shift left float immediate                 |
-| `010110` | Arithmetic shift right signed integer immediate       |
-| `010111` | Arithmetic shift right float immediate                |
+| `011100` | Arithmetic shift left signed integer register direct  |
+| `011101` | Arithmetic shift right signed integer register direct |
+| `011110` | Arithmetic shift left signed integer immediate        |
+| `011111` | Arithmetic shift right signed integer immediate       |
 | -        | -                                                     |
-| `011000` | Logical shift left register direct                    |
-| `011001` | Logical shift left immediate                          |
-| `011010` | Logical shift right register direct                   |
-| `011011` | Logical shift right immediate                         |
+| `100000` | Logical shift left register direct                    |
+| `100001` | Logical shift left immediate                          |
+| `100010` | Logical shift right register direct                   |
+| `100011` | Logical shift right immediate                         |
 | -        | -                                                     |
-| `011100` | And register direct                                   |
-| `011101` | And immediate                                         |
-| `011110` | Or register direct                                    |
-| `011111` | Or immediate                                          |
-| `100000` | Xor register direct                                   |
-| `100001` | Xor immediate                                         |
+| `100100` | And register direct                                   |
+| `100101` | And immediate                                         |
+| `100110` | And register direct sign extended                     |
+| `100111` | And immediate sign extended                           |
+| `101000` | Or register direct                                    |
+| `101001` | Or immediate                                          |
+| `101010` | Or register direct sign extended                      |
+| `101011` | Or immediate sign extended                            |
+| `101100` | Xor register direct                                   |
+| `101101` | Xor immediate                                         |
+| `101111` | Xor register direct sign extended                     |
+| `110000` | Xor immediate sign extended                           |
 | -        | -                                                     |
-| `100010` | Not                                                   |
+| `110001` | Not                                                   |
 
 ### Arithmetic Instructions
 **Assembly**:
@@ -705,10 +717,10 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 **Assembly**:
 
 ```
-{OPERATION} <DEST> <OP1> <OP2>
+{OPERATION}{Op Type} <DEST> <OP1> <OP2>
 ```
 
-3 operations * 2 addressing modes = 8 total instructions.
+3 operations * 2 operation types * 2 addressing modes = 12 total instructions.
 
 **Bit Organization**:
 
@@ -736,6 +748,13 @@ The logic operation is specified by `{OPERATION}`:
 | `AND`         | And       |
 | `OR`          | Or        |
 | `NOT`         | Not       |
+
+The Operation Type, whose symbol is appended to the symbol being used in the `{OPERATION}` table, is specified by `{Operation Type}`:
+
+| `{OPERATION}` | Operation |
+| ------------- | --------- |
+|               | Not Sign Extended       |
+| `SE`          | Sign Extended        |
 
 **Operands**:
 
