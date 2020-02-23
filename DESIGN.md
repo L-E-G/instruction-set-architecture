@@ -783,15 +783,13 @@ Word based operations:
 
 The operation field of each memory instruction has the following meaning:
 
-TODO: Update memory operation table + check size of operation field (could be 4 now)
 
 | Binary   | Operation |
 | -------- | --------- |
-| `000`    | Load      |
-| `001`    | Store     |
-| `010`    | Push      |
-| `011`    | Pop       |
-| `100`    | Move      |
+| `00`     | Load      |
+| `01`     | Store     |
+| `10`     | Push      |
+| `11`     | Pop       |
 
 ### Load
 **Assembly**:
@@ -805,7 +803,7 @@ LDR <DEST> <ADDR>
 
 | Condition | Type | Operation | `<DEST>` | `<ADDR>` | Not Used |
 | --------- | ---- | --------- | -------- | -------- | -------- |
-| 5         | 2    | 3         | 5        | 5        | 12       |
+| 5         | 2    | 2         | 5        | 5        | 12       |
 
 **Behavior**:
 
@@ -829,7 +827,7 @@ STR <SRC> <ADDR>
 
 | Condition | Type | Operation | `<SRC>` | `<ADDR>` | Not Used |
 | --------- | ---- | --------- | ------- | -------- | -------- |
-| 5         | 2    | 3         | 5       | 5        | 12       |
+| 5         | 2    | 2         | 5       | 5        | 12       |
 
 **Behavior**:
 
@@ -853,7 +851,7 @@ PUSH <SRC>
 
 | Condition | Type | Operation | `<SRC>` | Not Used |
 | --------- | ---- | --------- | ------- | -------- |
-| 5         | 2    | 3         | 5       | 17       |
+| 5         | 2    | 2         | 5       | 17       |
 
 **Behavior**:
 
@@ -876,7 +874,7 @@ POP <DEST>
 
 | Condition | Type | Operation | `<DEST>` | Not Used |
 | --------- | ---- | --------- | -------- | -------- |
-| 5         | 2    | 3         | 5        | 17       |
+| 5         | 2    | 2         | 5        | 17       |
 
 **Behavior**:
 
@@ -900,8 +898,11 @@ The operation field of each memory instruction has the following meaning:
 
 | Binary   | Operation |
 | -------- | --------- |
+| 00       | Jump      |
+| 01       | Set Interrupt Handler|
+| 10       | Perform Interrupt|
+| 11       | Return From Interrupt|
 
-TODO: Update control operation table
 
 ### Jump
 **Assembly**:
@@ -1030,8 +1031,11 @@ The operation field of each graphics instruction has the following meaning:
 
 | Binary | Meaning            |
 | ------ | -------            |
+| 000    | Load Sprite        |
+| 001    | Set Bit Block Transfer Memory|
+| 010    | Set Bit Block Transfer Dimensions|
+| 011    | Bit Block Transfer |
 
-TODO: Update graphics operation table
 
 ### Load Sprite
 **Assembly**:  
