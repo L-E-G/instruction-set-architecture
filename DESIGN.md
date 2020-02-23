@@ -300,31 +300,6 @@ The interrupt code will be stored in `R0`, valid interrupt codes are:
 | `110`  | `SPACE`      | Space key       |
 
 # Instructions
-## Types
-There are 3 data types which are supported in instructions:  
-
-- 32 bit two's complement integer
-- 32 bit unsigned integer
-- 32 bit IEEE 754 float
-
-Instructions have type variations when it matters, bit level operations do not.
-
-## Condition Fields
-All instructions currently have space for a condition field.  
-
-This field allows for predicated execution of instructions.  
-
-Currently only the jump instructions use this condition field.  
-
-All other instructions do not use this field at the moment, in the future they
-may. For right now the condition field will be set to null status.
-
-## Immediate Fields
-Most immediate fields in instructions will be sign extended to 32-bits.  
-
-There are a few instructions where this is not the case, in these instructions 
-this exception is noted.
-
 ## Assembly Documentation Syntax
 Instruction assembly is documented using the following syntax:
 
@@ -398,7 +373,32 @@ Would translate to the following values for the fields defined in the example:
 | `<OP1>`   | `10110010` |
 | `<OP2>`   | `10`       |
 
-## Instruction Type Field
+## Data Types
+There are 3 data types which are supported in instructions:  
+
+- 32 bit two's complement integer
+- 32 bit unsigned integer
+- 32 bit IEEE 754 float
+
+Instructions have type variations when it matters, bit level operations do not.
+
+## Condition Fields
+All instructions currently have space for a condition field.  
+
+This field allows for predicated execution of instructions.  
+
+Currently only the jump instructions use this condition field.  
+
+All other instructions do not use this field at the moment, in the future they
+may. For right now the condition field will be set to null status.
+
+## Immediate Fields
+Most immediate fields in instructions will be sign extended to 32-bits.  
+
+There are a few instructions where this is not the case, in these instructions 
+this exception is noted.
+
+## Instruction Types
 There are 3 instruction types:
 
 | Type Field Binary | Type     |
