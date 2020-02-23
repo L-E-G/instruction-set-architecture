@@ -393,10 +393,13 @@ All other instructions do not use this field at the moment, in the future they
 may. For right now the condition field will be set to null status.
 
 ## Immediate Fields
-Most immediate fields in instructions will be sign extended to 32-bits.  
+Most immediate fields, with the exception of those in graphics instruction, are 
+sign extended to 32-bits.  
 
-There are a few instructions where this is not the case, in these instructions 
-this exception is noted.
+Graphics instructions do not extend their immediate fields because they deal 
+with multiple different address spaces. The size of these immediate fields has
+been carefully specified. See the [Graphics Memory section](#graphics-memory) 
+for more details.
 
 ## Instruction Types
 There are 3 instruction types:
@@ -522,7 +525,7 @@ Performs a basic arithmetic operation, determine by `{OPERATION}`:
 | `DIV`         | `<OP1> / <OP2>` |
 | `MLT`         | `<OP1> * <OP2>` |
 
-The type numbers used in the arithmetic operation is specified by 
+The type of numbers used in the arithmetic operation is specified by 
 appending `{TYPE}`:
 
 | `{TYPE}` | Type             |
