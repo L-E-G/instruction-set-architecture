@@ -70,7 +70,7 @@ store instructions.
 4. DRAM: $^32 \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
 
 ## Graphics Memory
-The graphics memory is composed of SRAM (11 cycle delay).
+The graphics memory is composed of SRAM.
 
 There are two main pieces of graphics memory which are interacted with 
 exclusively through custom instructions:
