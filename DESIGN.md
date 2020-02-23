@@ -5,33 +5,51 @@ title: LEG
 author: Noah Huppert, Robert Scibelli
 header-includes: \pagenumbering{arabic}
 ---
-# Design
-ISA design.
-
 # Management Plan
-**Responsibilities**: Both Noah and Robert will be working on the simulator 
-back-end and user interface.
+## Responsibilities
+Team members will be generalists, working on all parts of the instruction set 
+implementation. 
 
-**Code management**: We have a GitHub organization and will use Git to track 
-source code. We have one repository for the design document and another for the
-simulator. We may create other repositories for future tools.
+This will give team members an opportunity to learn about writing simulator 
+code, developing user interfacing, and creating tooling.
 
-**Work coordination**: We will be using GitHub issues to track and assign work. 
-Team members will claim tickets as they start working on them so duplicate work
-does not occur. 
+## Code Management
+Git will be used to track source code.  
 
-**Bug tracking**: We will use GitHub issue to track any bugs we find.
+Code will be synchronized through GitHub repositories which are owned by a 
+shared GitHub organization.
 
-**Testing**: We will use GitHub Actions (a continuous integration solution) to
-run integration tests on every push of our source code. We will also introduce
-regression tests whenever a bug is found.
+The master branch of repositories will be stable at all times. Features will be
+developed in separate branches and merged in via GitHub pull requests. Pull 
+requests will be reviewed by the other team member to ensure correctness and 
+keep everyone up to date on changes.
 
-# Fundamentals
+## Work Coordination
+The team will use GitHub issues to track and assign work.  
+
+Every feature or bug will have its own issue which contains a full
+description of the work required to complete or fix the feature or bug.
+
+When a team member starts working on a feature or bug they will assign 
+themselves to the associated GitHub issue to ensure duplicate work does 
+not occur.
+
+## Testing
+Every repository will use GitHub actions (a continuous integration solution) to
+run integration tests on every commit. Pull requests will be required to pass 
+these tests before they can be merged into the stable master branch.  
+
+If new features are added corresponding tests must be added to ensure the 
+correctness of the new features.  
+
+If bugs are fixed regression tests must be added to ensure the bug is fixed and 
+does not occur again.
+
+# Memory
 **Endianess**: Little  
 **Memory organization**: Harvard
 
-# Memory
-The architecture memory is broken in to 2 parts:
+Memory is broken in to 2 parts:
 
 - Data and instructions
 - Graphics
