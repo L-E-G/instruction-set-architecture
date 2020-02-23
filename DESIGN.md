@@ -1,5 +1,6 @@
 ---
-geometry: margin=10px
+geometry: margin=1in
+documentclass: report
 title: LEG
 author: Noah Huppert, Robert Scibelli
 ---
