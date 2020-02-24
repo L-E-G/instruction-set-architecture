@@ -1,11 +1,13 @@
 ---
 geometry: margin=1in
 documentclass: report
-title: LEG
+title: '![Header Logo](./header.png){ height=200px }'
 subtitle: Logic, Execution, and Graphics RISC Architecture
 author: Noah Huppert and Robert Scibelli
 header-includes: \pagenumbering{arabic}
 ---
+
+
 # Management Plan
 ## Responsibilities
 Team members will act as generalists, working on all parts of the instruction 
@@ -438,7 +440,7 @@ There are 3 instruction types:
 
 36 total instructions.
 
-Typed arithmetic instructions ([Docs](#arithmetic-instructions)):
+[Typed arithmetic instructions](#arithmetic-instructions):
 
 - Add
 - Subtract
@@ -447,23 +449,23 @@ Typed arithmetic instructions ([Docs](#arithmetic-instructions)):
 
 Typed general instructions:
 
-- Compare ([Docs](#compare))
-- Shift ([Docs](#arithmetic-shift))
+- [Compare](#compare)
+- [Shift](#arithmetic-shift)
   - Arithmetic Right
   - Arithmetic Left
 
 Untyped general instructions:
 
-- Shift ([Docs](#logical-shift))
+- [Shift](#logical-shift)
   - Logical Right
   - Logical Left
-- 3 operand logic ([Docs](#3-operand-logic))
+- [3 operand logic](#3-operand-logic)
   - And
   - Or
   - Xor
 - 2 operand logic
-  - Not ([Docs](#not))
-- Move ([Docs](#move))
+  - [Not](#not)
+- [Move](#move)
   
 **Bit Organization**:
 
@@ -496,34 +498,30 @@ The operation field of each ALU instruction has the following meaning:
 | `010111` | Multiply signed integer immediate                     |
 | `011000` | Multiply float immediate                              |
 | -        | -                                                     |
-| `011001` | Compare unsigned integer                              |
-| `011010` | Compare signed integer                                |
-| `011011` | Compare float                                         |
+| `011001` | Move                                                  |
 | -        | -                                                     |
-| `011100` | Arithmetic shift left signed integer register direct  |
-| `011101` | Arithmetic shift right signed integer register direct |
-| `011110` | Arithmetic shift left signed integer immediate        |
-| `011111` | Arithmetic shift right signed integer immediate       |
+| `011010` | Compare unsigned integer                              |
+| `011011` | Compare signed integer                                |
+| `011100` | Compare float                                         |
 | -        | -                                                     |
-| `100000` | Logical shift left register direct                    |
-| `100001` | Logical shift left immediate                          |
-| `100010` | Logical shift right register direct                   |
-| `100011` | Logical shift right immediate                         |
+| `011101` | Arithmetic shift left register direct  |
+| `011110` | Arithmetic shift right register direct |
+| `011111` | Arithmetic shift left immediate        |
+| `100000` | Arithmetic shift right immediate       |
 | -        | -                                                     |
-| `100100` | And register direct                                   |
-| `100101` | And immediate                                         |
-| `100110` | And register direct sign extended                     |
-| `100111` | And immediate sign extended                           |
-| `101000` | Or register direct                                    |
-| `101001` | Or immediate                                          |
-| `101010` | Or register direct sign extended                      |
-| `101011` | Or immediate sign extended                            |
-| `101100` | Xor register direct                                   |
-| `101101` | Xor immediate                                         |
-| `101111` | Xor register direct sign extended                     |
-| `110000` | Xor immediate sign extended                           |
+| `100001` | Logical shift left register direct                    |
+| `100010` | Logical shift left immediate                          |
+| `100011` | Logical shift right register direct                   |
+| `100100` | Logical shift right immediate                         |
 | -        | -                                                     |
-| `110001` | Not                                                   |
+| `100101` | And register direct                                   |
+| `100110` | And immediate                                         |
+| `100111` | Or register direct                                    |
+| `101000` | Or immediate                                          |
+| `101001` | Xor register direct                                   |
+| `101010` | Xor immediate                                         |
+| -        | -                                                     |
+| `101011` | Not                                                   |
 
 ### Arithmetic Instructions
 **Assembly**:
@@ -638,7 +636,7 @@ If `{TYPE}` is not specified the assembler will default to
 **Assembly**:
 
 ```
-AS{DIRECTION}{TYPE} <DEST> <OP1>
+AS{DIRECTION} <DEST> <OP1>
 ```
 
 2 directions * 2 addressing modes: 4 total instructions.
@@ -791,10 +789,10 @@ Inverts all the bits in `<OP1>` and stores them in `<DEST>`.
 
 Word based operations:
 
-- Load ([Docs](#load))
-- Store ([Docs](#store))
-- Push ([Docs](#push))
-- Pop ([Docs](#pop))
+- [Load](#load)
+- [Store](#store)
+- [Push](#push)
+- [Pop](#pop)
 
 **Bit Organization**:
 
@@ -904,10 +902,10 @@ into the `<DEST>` register. Then increments the stack pointer register by one.
 
 ## Control
 
-- Jump ([Docs](#jump))
-- Set Interrupt Handler ([Docs](#set-interrupt-handler))
-- Perform Interrupt ([Docs](#perform-interrupt))
-- Jump Out Of Interrupt ([Docs](#jump-out-of-interrupt))
+- [Jump](#jump)
+- [Set Interrupt Handler](#set-interrupt-handler)
+- [Perform Interrupt](#perform-interrupt)
+- [Jump Out Of Interrupt](#jump-out-of-interrupt)
 
 **Bit Organization**:
 
@@ -1056,10 +1054,10 @@ Sets the program counter to the interrupt link register.
 ## Graphics
 8 total instructions.
 
-- Load Sprite ([Docs](#load-sprite))
-- Set Bit Block Transfer Memory ([Docs](#set-bit-block-transfer-memory))
-- Set Bit Block Transfer Dimensions ([Docs](#set-bit-block-transfer-dimensions))
-- Bit Block Transfer ([Docs](#bit-block-transfer))
+- [Load Sprite](#load-sprite)
+- [Set Bit Block Transfer Memory](#set-bit-block-transfer-memory)
+- [Set Bit Block Transfer Dimensions](#set-bit-block-transfer-dimensions)
+- [Bit Block Transfer](#bit-block-transfer)
 
 **Bit Organization**:  
 
