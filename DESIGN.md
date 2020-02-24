@@ -283,13 +283,15 @@ the handler is unset.
 The [Set Interrupt Handler](#set-interrupt-handler) instruction can be used to
 set this register.  
 
-The [Perform Interrupt](#perform-interrupt) instruction will be used internally by
-the simulator to trigger an interupt
+The [Perform Interrupt](#perform-interrupt) instruction will be used internally 
+by the simulator to trigger an interupt
 
 After the interrupt handler is done it must call 
-[Return From Interrupt](#return-from-interrupt).
+[Jump Out Of Interrupt](#jump-out-of-interrupt).
 
-The interrupt code is will be used in the interrupt will be stored in a memory mapped location in DRAM.  This location will be at memory address 0.
+The interrupt code identifies the cause of the interrupt.  
+When an interrupt occurs it will be loaded into main memory at 
+address `1111 1111 1111 1111 1111 1111 1111 1111`.
 
 Interrupts codes can have the following values:
 
@@ -720,10 +722,10 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 **Assembly**:
 
 ```
-{OPERATION}{Op Type} <DEST> <OP1> <OP2>
+{OPERATION} <DEST> <OP1> <OP2>
 ```
 
-3 operations * 2 operation types * 2 addressing modes = 12 total instructions.
+3 operations * 2 addressing modes = 6 total instructions.
 
 **Bit Organization**:
 
@@ -751,13 +753,6 @@ The logic operation is specified by `{OPERATION}`:
 | `AND`         | And       |
 | `OR`          | Or        |
 | `NOT`         | Not       |
-
-The Operation Type, whose symbol is appended to the symbol being used in the `{OPERATION}` table, is specified by `{Operation Type}`:
-
-| `{OPERATION}` | Operation |
-| ------------- | --------- |
-|  `(Empty) `   | Not Sign Extended       |
-| `SE`          | Sign Extended        |
 
 **Operands**:
 
@@ -918,12 +913,12 @@ into the `<DEST>` register. Then increments the stack pointer register by one.
 
 The operation field of each memory instruction has the following meaning:
 
-| Binary   | Operation |
-| -------- | --------- |
-| 00       | Jump      |
-| 01       | Set Interrupt Handler|
-| 10       | Perform Interrupt|
-| 11       | Return From Interrupt|
+| Binary   | Operation             |
+| -------- | ---------             |
+| 00       | Jump                  |
+| 01       | Set Interrupt Handler |
+| 10       | Perform Interrupt     |
+| 11       | Jump Out Of Interrupt |
 
 
 ### Jump
@@ -977,65 +972,86 @@ the program counter and the program counter is set to the result.
 - `<ADDR>`: Register containing new program counter value or a 23-bit immediate
 
 ### Set Interrupt Handler
-The Set Interrupt Handler instruction can be used to set the interrupt flag int he status register to a 1 to prohibit any further interrupts from occurring.
+**Assembly**:  
 
-**Assembly**
 ```
 SIH <ADDR>
 ```
-**Bit Organization**
-| Code | `<ADDR>`  | Not Used |
-| ---- | --------- | -------- |
-| 4    | 5         | 23       |
 
-This operation doesn't require any further data to perform, this is all routine instructions that has to happen with any interrupt.
+**Bit Organization**:  
 
-Operations that need to happen:
-- Check if status register is set to `NOINTERRUPT`, if it is exit the 
-  instruction, otherwise continue.
-- If the interrupt handler register is set to all 1's the interrupt handler is not set, exits the instruction.
-- Sets the status register to `NOINTERRUPT`
-- Registers `STS` and `INTLR` will be pushed to the stack
-- Sets the interrupt link register, `R26`, to the where program counter was before the interrupt came in
-- Jump to the interrupt handler, `R27`
+| Condition | Type | Operation | `<ADDR>`  | Not Used |
+| --------- | ---- | --------- | --------- | -------- |
+| 4         | 2    | 2         | 5         | 19       |
 
-Code: represents the interrupt code that the interrupt handler will be handling
-`<ADDR>`: represents the subrouting that the interrupt handler will be handling
+**Behavior**:  
+
+Sets the interrupt handler register to `<ADDR>`.
+
+**Operands**:  
+
+- `<ADDR>`: Register containing address of interrupt handler
 
 ### Perform Interrupt
-**Assembly**
+**Assembly**:  
+
 ```
-INT <ADDR>
+INT <CODE>
 ```
-**Bit Organization**
-| Code | `<ADDR>`  | Not Used |
-| ---- | --------- | -------- |
-| 4    | 5         | 23       |
 
-**Behavior**
-Handle the subroutine at the location specified in `<ADDR>`.  The code that is specified in the instruction will also have to be placed in the memory mapped location of 0.
+**Bit Organization**:  
 
-Code: represents the interrupt code that the interrupt handler will be handling
-`<ADDR>` represents the subrouting that the interrupt handler will be handling
+Register direct:  
 
-After the interrupt handler is done it must call:
+| Condition | Type | Operation | `<CODE>`  | Not Used |
+| --------- | ---- | --------- | --------- | -------- |
+| 4         | 2    | 2         | 5         | 19       |
+
+Immediate:  
+
+| Condition | Type | Operation | `<CODE>`  | Not Used |
+| --------- | ---- | --------- | --------- | -------- |
+| 4         | 2    | 2         | 4         | 20       |
+
+**Behavior**:  
+
+Internal instruction, can only be executed if inserted by the simulator.  
+
+Performs an interrupt by doing the following:  
+
+- Check if the interrupt flag in the status register is set, if so 
+  exit instruction
+- If the interrupt handler register is all 1's the interrupt handler is not set,
+  exit the instruction
+- Set the interrupt flag in the status register
+- Place the interrupt code at `1111 1111 1111 1111 1111 1111 1111 1111` in 
+  main memory
+- Set the interrupt link register to the program counter
+- Set the program counter to the value of the interrupt handler register
+
+**Operands**:  
+
+- `<CODE>`: Register or 4-bit immediate which is the interrupt code
 
 ### Jump Out Of Interrupt
-**Assembly**
+**Assembly**:  
+
 ```
-RFI
+IJMP
 ```
-**Bit Organization**
-| Not Used |
-| -------- |
-| 32       |
 
-After the interrupt handler is done it must call this instruction to perform the following:
+**Bit Organization**:  
 
-- Pops register `STS`
-- Set Interrupt flag to 0
-- Jumps to the address in the register `INTLR`
 
+| Condition | Type | Operation | Not Used |
+| --------- | ---- | --------- | -------- |
+| 4         | 2    | 2         | 24       |
+
+**Behavior**:  
+
+A special jump instruction for returning from interrupts.  
+
+Sets the program counter to the interrupt link register.
 
 ## Graphics
 8 total instructions.
@@ -1049,12 +1065,12 @@ After the interrupt handler is done it must call this instruction to perform the
 
 The operation field of each graphics instruction has the following meaning:
 
-| Binary | Meaning            |
-| ------ | -------            |
-| 000    | Load Sprite        |
-| 001    | Set Bit Block Transfer Memory|
-| 010    | Set Bit Block Transfer Dimensions|
-| 011    | Bit Block Transfer |
+| Binary | Meaning                           |
+| ------ | -------                           |
+| 00     | Load Sprite                       |
+| 01     | Set Bit Block Transfer Memory     |
+| 10     | Set Bit Block Transfer Dimensions |
+| 11     | Bit Block Transfer                |
 
 
 ### Load Sprite
@@ -1071,13 +1087,13 @@ Register direct:
 
 | Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Not Used |
 | --------- | ---- | --------- | -------- | ------- | ------- | -------- |
-| 5         | 2    | 3         | 5        | 5       | 5       | 19       |
+| 5         | 2    | 2         | 5        | 5       | 5       | 20       |
 
 Immediate:
 
-| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` |
-| --------- | ---- | --------- | -------- | ------- | ------- |
-| 5         | 2    | 3         | 12       | 10      | 12      |
+| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Not Used |
+| --------- | ---- | --------- | -------- | ------- | ------- | -------- |
+| 5         | 2    | 2         | 12       | 10      | 12      | 1        |
 
 **Behavior**:  
 
@@ -1113,7 +1129,7 @@ BLITMEM <SRC> <DEST>
 
 | Condition | Type | Operation | `<SRC>` | `<DEST>` | Not Used |
 | --------- | ---- | --------- | ------- | -------- | -------- |
-| 5         | 2    | 3         | 5       | 5        | 12       |
+| 5         | 2    | 2         | 5       | 5        | 13       |
 
 **Behavior**:  
 
@@ -1144,13 +1160,13 @@ Register direct:
 
 | Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
 | --------- | ---- | --------- | --------- | ---------- | -------- |
-| 5         | 2    | 3         | 5         | 5          | 12       |
+| 5         | 2    | 2         | 5         | 5          | 13       |
 
 Immediate:  
 
 | Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
 | --------- | ---- | --------- | --------- | ---------- | -------- |
-| 5         | 2    | 3         | 7         | 7          | 8        |
+| 5         | 2    | 2         | 7         | 7          | 9        |
 
 **Behavior**:  
 
@@ -1178,13 +1194,13 @@ Register direct:
 
 | Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
 | --------- | ---- | --------- | ----------- | ------------- | -------- |
-| 5         | 2    | 3         | 5           | 5             | 12       |
+| 5         | 2    | 2         | 5           | 5             | 13       |
 
 Immediate:  
 
 | Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
 | --------- | ---- | --------- | ----------- | ------------- | -------- |
-| 5         | 2    | 3         | 4           | 8             | 10       |
+| 5         | 2    | 2         | 4           | 8             | 11       |
 
 **Behavior**:  
 
