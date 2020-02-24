@@ -173,9 +173,17 @@ Some registers have aliases.
 ## General Purpose
 27 mixed 32-bit registers.
 
-`R0` through `R26`.
+`R0` through `R25`.
 
 Initially all set to 0.
+
+## Interrupt Link Register
+32-bit register.  
+
+`R26`, `INTLR`.  
+
+Store the address to return to after an interrupt has completed.  
+Initially set to 0.
 
 ## Interrupt Handler
 32-bit register.  
@@ -281,24 +289,19 @@ the simulator to trigger an interupt
 After the interrupt handler is done it must call 
 [Return From Interrupt](#return-from-interrupt).
 
-The interrupt code will be stored in `R0`, valid interrupt codes are:
+The interrupt code is will be used in the interrupt will be stored in a memory mapped location in DRAM.  This location will be at memory address 0.
 
-| Binary | Assembly   | Meaning                                                |
-| ------ | ---------- | -------                                                |
-| `0`    | `KEYPRESS` | A key was pressed, the key code will be stored in `R1` |
-
-`R1` holds additional details about an interrupt, for the `KEYPRESS` interrupt
-`R1` has the following values:
+Interrupts codes can have the following values:
 
 | Binary | Assembly     | Meaning         |
 | ------ | --------     | -------         |
-| `000`  | `UPARROW`    | Up arrow key    |
-| `001`  | `DOWNARROW`  | Down arrow key  |
-| `010`  | `LEFTARROW`  | Left arrow key  |
-| `011`  | `RIGHTARROW` | Right arrow key |
-| `100`  | `ENTER`      | Enter key       |
-| `101`  | `ESCAPE`     | Escape key      |
-| `110`  | `SPACE`      | Space key       |
+| `0000` | `UPARROW`    | Up arrow key    |
+| `0001` | `DOWNARROW`  | Down arrow key  |
+| `0010` | `LEFTARROW`  | Left arrow key  |
+| `0011` | `RIGHTARROW` | Right arrow key |
+| `0100` | `ENTER`      | Enter key       |
+| `0101` | `ESCAPE`     | Escape key      |
+| `0110` | `SPACE`      | Space key       |
 
 # Instructions
 ## Assembly Documentation Syntax
@@ -753,7 +756,7 @@ The Operation Type, whose symbol is appended to the symbol being used in the `{O
 
 | `{OPERATION}` | Operation |
 | ------------- | --------- |
-|               | Not Sign Extended       |
+|  `(Empty) `   | Not Sign Extended       |
 | `SE`          | Sign Extended        |
 
 **Operands**:
@@ -909,7 +912,7 @@ into the `<DEST>` register. Then increments the stack pointer register by one.
 - Jump ([Docs](#jump))
 - Set Interrupt Handler ([Docs](#set-interrupt-handler))
 - Perform Interrupt ([Docs](#perform-interrupt))
-- Return From Interrupt ([Docs](#return-from-interrupt))
+- Jump Out Of Interrupt ([Docs](#jump-out-of-interrupt))
 
 **Bit Organization**:
 
@@ -978,63 +981,61 @@ The Set Interrupt Handler instruction can be used to set the interrupt flag int 
 
 **Assembly**
 ```
-SIH <CODE> <VAL> <ADDR>
+SIH <ADDR>
 ```
 **Bit Organization**
-| Code | Value | `<ADDR>`  | Not Used |
-| ---- | ----- | --------- | -------- |
-| 1    | 3     | 5         | 23       |
+| Code | `<ADDR>`  | Not Used |
+| ---- | --------- | -------- |
+| 4    | 5         | 23       |
 
 This operation doesn't require any further data to perform, this is all routine instructions that has to happen with any interrupt.
 
 Operations that need to happen:
 - Check if status register is set to `NOINTERRUPT`, if it is exit the 
   instruction, otherwise continue.
-- If the interrupt handler register is set to all 1's the interrupt handler is 
-  not set, exits the instruction.
+- If the interrupt handler register is set to all 1's the interrupt handler is not set, exits the instruction.
 - Sets the status register to `NOINTERRUPT`
-- Registers `R0`, `R1`, and `STS` will be pushed to the stack
-- Sets the link register to the where program counter was before the interrupt
-  came in
-- Jump to the interrupt handler
+- Registers `STS` and `INTLR` will be pushed to the stack
+- Sets the interrupt link register, `R26`, to the where program counter was before the interrupt came in
+- Jump to the interrupt handler, `R27`
 
 Code: represents the interrupt code that the interrupt handler will be handling
-Value: represents the type of interrupt that the handler will be handling
-`<ADDR>` represents the subrouting that the interrupt handler will be handling
+`<ADDR>`: represents the subrouting that the interrupt handler will be handling
 
 ### Perform Interrupt
 **Assembly**
 ```
-INT <CODE> <VAL> <ADDR>
+INT <ADDR>
 ```
 **Bit Organization**
-| Code | Value | `<ADDR>`  | Not Used |
-| ---- | ----- | --------- | -------- |
-| 1    | 3     | 5         | 23       |
+| Code | `<ADDR>`  | Not Used |
+| ---- | --------- | -------- |
+| 4    | 5         | 23       |
+
+**Behavior**
+Handle the subroutine at the location specified in `<ADDR>`.  The code that is specified in the instruction will also have to be placed in the memory mapped location of 0.
 
 Code: represents the interrupt code that the interrupt handler will be handling
-Value: represents the type of interrupt that the handler will be handling
 `<ADDR>` represents the subrouting that the interrupt handler will be handling
 
 After the interrupt handler is done it must call:
 
-### Return From Interrupt
+### Jump Out Of Interrupt
 **Assembly**
 ```
-RFI <ADDR>
+RFI
 ```
 **Bit Organization**
-| `<ADDR>`  | Not Used |
-| --------- | -------- |
-| 5         | 27       |
+| Not Used |
+| -------- |
+| 32       |
 
 After the interrupt handler is done it must call this instruction to perform the following:
 
-- Pops registers `R0`, `R1`, and `STS`
+- Pops register `STS`
 - Set Interrupt flag to 0
-- Jumps to the address in the link register
+- Jumps to the address in the register `INTLR`
 
-`<ADDR>` represents the subrouting that the interrupt handler will be handling
 
 ## Graphics
 8 total instructions.
