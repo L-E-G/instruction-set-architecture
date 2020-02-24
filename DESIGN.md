@@ -1049,7 +1049,12 @@ IJMP
 
 A special jump instruction for returning from interrupts.  
 
-Sets the program counter to the interrupt link register.
+Performs the following actions:
+
+- Checks if the interrupt flag is set in the status register, if not exits 
+  the instruction
+- Sets the interrupt flag in the set status register to false
+- Sets the program counter to the value in the interrupt link register
 
 ## Graphics
 8 total instructions.
