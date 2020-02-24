@@ -173,9 +173,17 @@ Some registers have aliases.
 ## General Purpose
 27 mixed 32-bit registers.
 
-`R0` through `R26`.
+`R0` through `R25`.
 
 Initially all set to 0.
+
+## Interrupt Link Register
+32-bit register.  
+
+`R26`, `INTLR`.  
+
+Store the address to return to after an interrupt has completed.  
+Initially set to 0.
 
 ## Interrupt Handler
 32-bit register.  
@@ -275,30 +283,27 @@ the handler is unset.
 The [Set Interrupt Handler](#set-interrupt-handler) instruction can be used to
 set this register.  
 
-The [Perform Interrupt](#perform-interrupt) instruction will be used internally by
-the simulator to trigger an interupt
+The [Perform Interrupt](#perform-interrupt) instruction will be used internally 
+by the simulator to trigger an interupt
 
 After the interrupt handler is done it must call 
-[Return From Interrupt](#return-from-interrupt).
+[Jump Out Of Interrupt](#jump-out-of-interrupt).
 
-The interrupt code will be stored in `R0`, valid interrupt codes are:
+The interrupt code identifies the cause of the interrupt.  
+When an interrupt occurs it will be loaded into main memory at 
+address `1111 1111 1111 1111 1111 1111 1111 1111`.
 
-| Binary | Assembly   | Meaning                                                |
-| ------ | ---------- | -------                                                |
-| `0`    | `KEYPRESS` | A key was pressed, the key code will be stored in `R1` |
-
-`R1` holds additional details about an interrupt, for the `KEYPRESS` interrupt
-`R1` has the following values:
+Interrupts codes can have the following values:
 
 | Binary | Assembly     | Meaning         |
 | ------ | --------     | -------         |
-| `000`  | `UPARROW`    | Up arrow key    |
-| `001`  | `DOWNARROW`  | Down arrow key  |
-| `010`  | `LEFTARROW`  | Left arrow key  |
-| `011`  | `RIGHTARROW` | Right arrow key |
-| `100`  | `ENTER`      | Enter key       |
-| `101`  | `ESCAPE`     | Escape key      |
-| `110`  | `SPACE`      | Space key       |
+| `0000` | `UPARROW`    | Up arrow key    |
+| `0001` | `DOWNARROW`  | Down arrow key  |
+| `0010` | `LEFTARROW`  | Left arrow key  |
+| `0011` | `RIGHTARROW` | Right arrow key |
+| `0100` | `ENTER`      | Enter key       |
+| `0101` | `ESCAPE`     | Escape key      |
+| `0110` | `SPACE`      | Space key       |
 
 # Instructions
 ## Assembly Documentation Syntax
@@ -464,49 +469,61 @@ Untyped general instructions:
 
 The operation field of each ALU instruction has the following meaning:
 
-TODO: Update ALU operation table
-
 | Binary   | Operation                                             |
 | -------  | -------------                                         |
-| `000001` | Add unsigned integer                                  |
-| `000010` | Add signed integer                                    |
-| `000011` | Add float                                             |
-| `000100` | Subtract unsigned integer                             |
-| `000101` | Subtract signed integer                               |
-| `000110` | Subtract float                                        |
-| `000111` | Divide unsigned integer                               |
-| `001000` | Divide signed integer                                 |
-| `001001` | Divide float                                          |
-| `001010` | Multiply unsigned integer                             |
-| `001011` | Multiply signed integer                               |
-| `001100` | Multiply float                                        |
+| `000001` | Add unsigned integer register direct                  |
+| `000010` | Add signed integer register direct                    |
+| `000011` | Add float register direct                             |
+| `000100` | Add unsigned integer immediate                        |
+| `000101` | Add signed integer immediate                          |
+| `000110` | Add float immediate                                   |
+| `000111` | Subtract unsigned integer register direct             |
+| `001000` | Subtract signed integer register direct               |
+| `001001` | Subtract float register direct                        |
+| `001010` | Subtract unsigned integer immediate                   |
+| `001011` | Subtract signed integer immediate                     |
+| `001100` | Subtract float immediate                              |
+| `001101` | Divide unsigned integer register direct               |
+| `001110` | Divide signed integer register direct                 |
+| `001111` | Divide float register direct                          |
+| `010000` | Divide unsigned integer immediate                     |
+| `010001` | Divide signed integer immediate                       |
+| `010010` | Divide float immediate                                |
+| `010011` | Multiply unsigned integer register direct             |
+| `010100` | Multiply signed integer register direct               |
+| `010101` | Multiply float register direct                        |
+| `010110` | Multiply unsigned integer immediate                   |
+| `010111` | Multiply signed integer immediate                     |
+| `011000` | Multiply float immediate                              |
 | -        | -                                                     |
-| `001101` | Compare unsigned integer                              |
-| `001110` | Compare signed integer                                |
-| `001111` | Compare float                                         |
+| `011001` | Compare unsigned integer                              |
+| `011010` | Compare signed integer                                |
+| `011011` | Compare float                                         |
 | -        | -                                                     |
-| `010000` | Arithmetic shift left signed integer register direct  |
-| `010001` | Arithmetic shift left float register direct           |
-| `010010` | Arithmetic shift right signed integer register direct |
-| `010011` | Arithmetic shift right float register direct          |
-| `010100` | Arithmetic shift left signed integer immediate        |
-| `010101` | Arithmetic shift left float immediate                 |
-| `010110` | Arithmetic shift right signed integer immediate       |
-| `010111` | Arithmetic shift right float immediate                |
+| `011100` | Arithmetic shift left signed integer register direct  |
+| `011101` | Arithmetic shift right signed integer register direct |
+| `011110` | Arithmetic shift left signed integer immediate        |
+| `011111` | Arithmetic shift right signed integer immediate       |
 | -        | -                                                     |
-| `011000` | Logical shift left register direct                    |
-| `011001` | Logical shift left immediate                          |
-| `011010` | Logical shift right register direct                   |
-| `011011` | Logical shift right immediate                         |
+| `100000` | Logical shift left register direct                    |
+| `100001` | Logical shift left immediate                          |
+| `100010` | Logical shift right register direct                   |
+| `100011` | Logical shift right immediate                         |
 | -        | -                                                     |
-| `011100` | And register direct                                   |
-| `011101` | And immediate                                         |
-| `011110` | Or register direct                                    |
-| `011111` | Or immediate                                          |
-| `100000` | Xor register direct                                   |
-| `100001` | Xor immediate                                         |
+| `100100` | And register direct                                   |
+| `100101` | And immediate                                         |
+| `100110` | And register direct sign extended                     |
+| `100111` | And immediate sign extended                           |
+| `101000` | Or register direct                                    |
+| `101001` | Or immediate                                          |
+| `101010` | Or register direct sign extended                      |
+| `101011` | Or immediate sign extended                            |
+| `101100` | Xor register direct                                   |
+| `101101` | Xor immediate                                         |
+| `101111` | Xor register direct sign extended                     |
+| `110000` | Xor immediate sign extended                           |
 | -        | -                                                     |
-| `100010` | Not                                                   |
+| `110001` | Not                                                   |
 
 ### Arithmetic Instructions
 **Assembly**:
@@ -708,7 +725,7 @@ The direction bits are shifted is specified by `{DIRECTION}`:
 {OPERATION} <DEST> <OP1> <OP2>
 ```
 
-3 operations * 2 addressing modes = 8 total instructions.
+3 operations * 2 addressing modes = 6 total instructions.
 
 **Bit Organization**:
 
@@ -783,15 +800,13 @@ Word based operations:
 
 The operation field of each memory instruction has the following meaning:
 
-TODO: Update memory operation table + check size of operation field (could be 4 now)
 
 | Binary   | Operation |
 | -------- | --------- |
-| `000`    | Load      |
-| `001`    | Store     |
-| `010`    | Push      |
-| `011`    | Pop       |
-| `100`    | Move      |
+| `00`     | Load      |
+| `01`     | Store     |
+| `10`     | Push      |
+| `11`     | Pop       |
 
 ### Load
 **Assembly**:
@@ -805,7 +820,7 @@ LDR <DEST> <ADDR>
 
 | Condition | Type | Operation | `<DEST>` | `<ADDR>` | Not Used |
 | --------- | ---- | --------- | -------- | -------- | -------- |
-| 5         | 2    | 3         | 5        | 5        | 12       |
+| 5         | 2    | 2         | 5        | 5        | 12       |
 
 **Behavior**:
 
@@ -829,7 +844,7 @@ STR <SRC> <ADDR>
 
 | Condition | Type | Operation | `<SRC>` | `<ADDR>` | Not Used |
 | --------- | ---- | --------- | ------- | -------- | -------- |
-| 5         | 2    | 3         | 5       | 5        | 12       |
+| 5         | 2    | 2         | 5       | 5        | 12       |
 
 **Behavior**:
 
@@ -853,7 +868,7 @@ PUSH <SRC>
 
 | Condition | Type | Operation | `<SRC>` | Not Used |
 | --------- | ---- | --------- | ------- | -------- |
-| 5         | 2    | 3         | 5       | 17       |
+| 5         | 2    | 2         | 5       | 17       |
 
 **Behavior**:
 
@@ -876,7 +891,7 @@ POP <DEST>
 
 | Condition | Type | Operation | `<DEST>` | Not Used |
 | --------- | ---- | --------- | -------- | -------- |
-| 5         | 2    | 3         | 5        | 17       |
+| 5         | 2    | 2         | 5        | 17       |
 
 **Behavior**:
 
@@ -892,16 +907,19 @@ into the `<DEST>` register. Then increments the stack pointer register by one.
 - Jump ([Docs](#jump))
 - Set Interrupt Handler ([Docs](#set-interrupt-handler))
 - Perform Interrupt ([Docs](#perform-interrupt))
-- Return From Interrupt ([Docs](#return-from-interrupt))
+- Jump Out Of Interrupt ([Docs](#jump-out-of-interrupt))
 
 **Bit Organization**:
 
 The operation field of each memory instruction has the following meaning:
 
-| Binary   | Operation |
-| -------- | --------- |
+| Binary   | Operation             |
+| -------- | ---------             |
+| 00       | Jump                  |
+| 01       | Set Interrupt Handler |
+| 10       | Perform Interrupt     |
+| 11       | Jump Out Of Interrupt |
 
-TODO: Update control operation table
 
 ### Jump
 **Assembly**:
@@ -954,67 +972,86 @@ the program counter and the program counter is set to the result.
 - `<ADDR>`: Register containing new program counter value or a 23-bit immediate
 
 ### Set Interrupt Handler
-The Set Interrupt Handler instruction can be used to set the interrupt flag int he status register to a 1 to prohibit any further interrupts from occurring.
+**Assembly**:  
 
-**Assembly**
 ```
-SIH <CODE> <VAL> <ADDR>
+SIH <ADDR>
 ```
-**Bit Organization**
-| Code | Value | `<ADDR>`  | Not Used |
-| ---- | ----- | --------- | -------- |
-| 1    | 3     | 5         | 23       |
 
-This operation doesn't require any further data to perform, this is all routine instructions that has to happen with any interrupt.
+**Bit Organization**:  
 
-Operations that need to happen:
-- Check if status register is set to `NOINTERRUPT`, if it is exit the 
-  instruction, otherwise continue.
-- If the interrupt handler register is set to all 1's the interrupt handler is 
-  not set, exits the instruction.
-- Sets the status register to `NOINTERRUPT`
-- Registers `R0`, `R1`, and `STS` will be pushed to the stack
-- Sets the link register to the where program counter was before the interrupt
-  came in
-- Jump to the interrupt handler
+| Condition | Type | Operation | `<ADDR>`  | Not Used |
+| --------- | ---- | --------- | --------- | -------- |
+| 4         | 2    | 2         | 5         | 19       |
 
-Code: represents the interrupt code that the interrupt handler will be handling
-Value: represents the type of interrupt that the handler will be handling
-`<ADDR>` represents the subrouting that the interrupt handler will be handling
+**Behavior**:  
+
+Sets the interrupt handler register to `<ADDR>`.
+
+**Operands**:  
+
+- `<ADDR>`: Register containing address of interrupt handler
 
 ### Perform Interrupt
-**Assembly**
+**Assembly**:  
+
 ```
-INT <CODE> <VAL> <ADDR>
+INT <CODE>
 ```
-**Bit Organization**
-| Code | Value | `<ADDR>`  | Not Used |
-| ---- | ----- | --------- | -------- |
-| 1    | 3     | 5         | 23       |
 
-Code: represents the interrupt code that the interrupt handler will be handling
-Value: represents the type of interrupt that the handler will be handling
-`<ADDR>` represents the subrouting that the interrupt handler will be handling
+**Bit Organization**:  
 
-After the interrupt handler is done it must call:
+Register direct:  
 
-### Return From Interrupt
-**Assembly**
+| Condition | Type | Operation | `<CODE>`  | Not Used |
+| --------- | ---- | --------- | --------- | -------- |
+| 4         | 2    | 2         | 5         | 19       |
+
+Immediate:  
+
+| Condition | Type | Operation | `<CODE>`  | Not Used |
+| --------- | ---- | --------- | --------- | -------- |
+| 4         | 2    | 2         | 4         | 20       |
+
+**Behavior**:  
+
+Internal instruction, can only be executed if inserted by the simulator.  
+
+Performs an interrupt by doing the following:  
+
+- Check if the interrupt flag in the status register is set, if so 
+  exit instruction
+- If the interrupt handler register is all 1's the interrupt handler is not set,
+  exit the instruction
+- Set the interrupt flag in the status register
+- Place the interrupt code at `1111 1111 1111 1111 1111 1111 1111 1111` in 
+  main memory
+- Set the interrupt link register to the program counter
+- Set the program counter to the value of the interrupt handler register
+
+**Operands**:  
+
+- `<CODE>`: Register or 4-bit immediate which is the interrupt code
+
+### Jump Out Of Interrupt
+**Assembly**:  
+
 ```
-RFI <ADDR>
+IJMP
 ```
-**Bit Organization**
-| `<ADDR>`  | Not Used |
-| --------- | -------- |
-| 5         | 27       |
 
-After the interrupt handler is done it must call this instruction to perform the following:
+**Bit Organization**:  
 
-- Pops registers `R0`, `R1`, and `STS`
-- Set Interrupt flag to 0
-- Jumps to the address in the link register
 
-`<ADDR>` represents the subrouting that the interrupt handler will be handling
+| Condition | Type | Operation | Not Used |
+| --------- | ---- | --------- | -------- |
+| 4         | 2    | 2         | 24       |
+
+**Behavior**:  
+
+A special jump instruction for returning from interrupts.  
+
+Sets the program counter to the interrupt link register.
 
 ## Graphics
 8 total instructions.
@@ -1028,10 +1065,13 @@ After the interrupt handler is done it must call this instruction to perform the
 
 The operation field of each graphics instruction has the following meaning:
 
-| Binary | Meaning            |
-| ------ | -------            |
+| Binary | Meaning                           |
+| ------ | -------                           |
+| 00     | Load Sprite                       |
+| 01     | Set Bit Block Transfer Memory     |
+| 10     | Set Bit Block Transfer Dimensions |
+| 11     | Bit Block Transfer                |
 
-TODO: Update graphics operation table
 
 ### Load Sprite
 **Assembly**:  
@@ -1047,13 +1087,13 @@ Register direct:
 
 | Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Not Used |
 | --------- | ---- | --------- | -------- | ------- | ------- | -------- |
-| 5         | 2    | 3         | 5        | 5       | 5       | 19       |
+| 5         | 2    | 2         | 5        | 5       | 5       | 20       |
 
 Immediate:
 
-| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` |
-| --------- | ---- | --------- | -------- | ------- | ------- |
-| 5         | 2    | 3         | 12       | 10      | 12      |
+| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Not Used |
+| --------- | ---- | --------- | -------- | ------- | ------- | -------- |
+| 5         | 2    | 2         | 12       | 10      | 12      | 1        |
 
 **Behavior**:  
 
@@ -1089,7 +1129,7 @@ BLITMEM <SRC> <DEST>
 
 | Condition | Type | Operation | `<SRC>` | `<DEST>` | Not Used |
 | --------- | ---- | --------- | ------- | -------- | -------- |
-| 5         | 2    | 3         | 5       | 5        | 12       |
+| 5         | 2    | 2         | 5       | 5        | 13       |
 
 **Behavior**:  
 
@@ -1120,13 +1160,13 @@ Register direct:
 
 | Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
 | --------- | ---- | --------- | --------- | ---------- | -------- |
-| 5         | 2    | 3         | 5         | 5          | 12       |
+| 5         | 2    | 2         | 5         | 5          | 13       |
 
 Immediate:  
 
 | Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
 | --------- | ---- | --------- | --------- | ---------- | -------- |
-| 5         | 2    | 3         | 7         | 7          | 8        |
+| 5         | 2    | 2         | 7         | 7          | 9        |
 
 **Behavior**:  
 
@@ -1154,13 +1194,13 @@ Register direct:
 
 | Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
 | --------- | ---- | --------- | ----------- | ------------- | -------- |
-| 5         | 2    | 3         | 5           | 5             | 12       |
+| 5         | 2    | 2         | 5           | 5             | 13       |
 
 Immediate:  
 
 | Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
 | --------- | ---- | --------- | ----------- | ------------- | -------- |
-| 5         | 2    | 3         | 4           | 8             | 10       |
+| 5         | 2    | 2         | 4           | 8             | 11       |
 
 **Behavior**:  
 
