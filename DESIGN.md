@@ -67,9 +67,9 @@ store instructions.
 
 **Memory Hierarchy**:  
 
-1. Level 1, SRAM: 64 KB, 4-way associative, 64 bytes / line (4 cycle delay)
-2. Level 2, SRAM: 256 KB, direct mapped, 64 byte / line (11 cycle delay)
-3. Level 3, SRAM: 8 MB, direct mapped, 64 byte / line (38 cycle delay)
+1. Level 1, SRAM: 64 KB, 4-way associative (1 cycle delay)
+2. Level 2, SRAM: 256 KB, direct mapped (10 cycle delay)
+3. Level 3, SRAM: 8 MB, direct mapped (40 cycle delay)
 4. DRAM: $2^{32} \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
 
 ## Graphics Memory
@@ -799,12 +799,14 @@ Word based operations:
 The operation field of each memory instruction has the following meaning:
 
 
-| Binary   | Operation |
-| -------- | --------- |
-| `00`     | Load      |
-| `01`     | Store     |
-| `10`     | Push      |
-| `11`     | Pop       |
+| Binary   | Operation             |
+| -------- | ---------             |
+| `000`    | Load register direct  |
+| `001`    | Load immediate        |
+| `010`    | Store register direct |
+| `011`    | Store immediate       |
+| `100`    | Push                  |
+| `101`    | Pop                   |
 
 ### Load
 **Assembly**:
@@ -812,23 +814,35 @@ The operation field of each memory instruction has the following meaning:
 LDR <DEST> <ADDR>
 ```
 
-1 total instruction.
+2 addressing modes = 2 total instructions.
 
 **Bit Organization**:
 
-| Condition | Type | Operation | `<DEST>` | `<ADDR>` | Not Used |
+Register direct:
+
+| Condition | Type | Operation | `<DEST>` | `<ADDR>` | Not used |
 | --------- | ---- | --------- | -------- | -------- | -------- |
-| 5         | 2    | 2         | 5        | 5        | 12       |
+| 5         | 2    | 3         | 5        | 5        | 12       |
+
+Immediate:
+
+| Condition | Type | Operation | `<DEST>` | `<ADDR>` |
+| --------- | ---- | --------- | -------- | -------- |
+| 5         | 2    | 3         | 5        | 17       |
 
 **Behavior**:
 
 Reads a word of memory from the address specified by the `<ADDR>` register into 
 the `<DEST>` register.
 
+If in the immediate form the address immediate is sign extended and added to the
+incremented program counter value.
+
 **Operands**:
 
 - `<DEST>`: Register to store result
-- `<ADDR>`: Register containing the memory address to access
+- `<ADDR>`: Register or signed immediate value which will be added to `PC + 1`
+            containing the memory address to access
 
 ### Store
 **Assembly**:
@@ -836,23 +850,35 @@ the `<DEST>` register.
 STR <SRC> <ADDR>
 ```
 
-1 total instruction.
+2 addressing modes = 2 total instructions.
 
 **Bit Organization**:
 
+Register direct:
+
 | Condition | Type | Operation | `<SRC>` | `<ADDR>` | Not Used |
 | --------- | ---- | --------- | ------- | -------- | -------- |
-| 5         | 2    | 2         | 5       | 5        | 12       |
+| 5         | 2    | 3         | 5       | 5        | 12       |
+
+Immediate:
+
+| Condition | Type | Operation | `<SRC>` | `<ADDR>` |
+| --------- | ---- | --------- | ------- | -------- |
+| 5         | 2    | 3         | 5       | 17       |
 
 **Behavior**:
 
 Writes a word of data from the `<SRC>` register to the memory address specified
 by the `<ADDR>` register.
 
+If in the immediate form the address immediate is sign extended and added to the
+incremented program counter value.
+
 **Operands**:
 
 - `<SRC>`: Register containing data
-- `<ADDR>`: Register containing the memory address to store data
+- `<ADDR>`: Register or signed immediate field added to `PC + 1` containing the
+            memory address to store data 
 
 ### Push
 **Assembly**:
@@ -866,7 +892,7 @@ PUSH <SRC>
 
 | Condition | Type | Operation | `<SRC>` | Not Used |
 | --------- | ---- | --------- | ------- | -------- |
-| 5         | 2    | 2         | 5       | 17       |
+| 5         | 2    | 3         | 5       | 17       |
 
 **Behavior**:
 
@@ -889,7 +915,7 @@ POP <DEST>
 
 | Condition | Type | Operation | `<DEST>` | Not Used |
 | --------- | ---- | --------- | -------- | -------- |
-| 5         | 2    | 2         | 5        | 17       |
+| 5         | 2    | 3         | 5        | 17       |
 
 **Behavior**:
 
