@@ -67,9 +67,9 @@ store instructions.
 
 **Memory Hierarchy**:  
 
-1. Level 1, SRAM: 64 KB, 4-way associative, 64 bytes / line (4 cycle delay)
-2. Level 2, SRAM: 256 KB, direct mapped, 64 byte / line (11 cycle delay)
-3. Level 3, SRAM: 8 MB, direct mapped, 64 byte / line (38 cycle delay)
+1. Level 1, SRAM: 64 KB, 4-way associative (1 cycle delay)
+2. Level 2, SRAM: 256 KB, direct mapped (10 cycle delay)
+3. Level 3, SRAM: 8 MB, direct mapped (40 cycle delay)
 4. DRAM: $2^{32} \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
 
 ## Graphics Memory
