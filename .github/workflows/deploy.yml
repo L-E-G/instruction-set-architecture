@@ -14,12 +14,13 @@ jobs:
     - name: Install Dependencies 📦
       run: |
         sudo apt-get update
-        sudo apt-get install -y pandoc texlive-latex-base texlive-latex-extra texlive-fonts-recommended rsync
+        sudo apt-get install -y pandoc texlive-latex-base texlive-latex-extra texlive-fonts-recommended rsync tree
     
     - name: Build PDF 🛠️
       run: |
         mkdir deploy
         pandoc --wrap=preserve -o deploy/DESIGN.pdf DESIGN.md
+        tree
 
     - name: Install SSH Client 🛰️
       uses: webfactory/ssh-agent@v0.2.0
