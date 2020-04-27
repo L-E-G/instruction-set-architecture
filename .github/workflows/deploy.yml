@@ -17,7 +17,7 @@ jobs:
         sudo apt-get install -y pandoc
     
     - name: Build PDF 🛠️
-      run: pandic --wrap=preserve -o DESIGN.pdf DESIGN.md
+      run: pandoc --wrap=preserve -o DESIGN.pdf DESIGN.md
 
     - name: Install SSH Client 🛰️
       uses: webfactory/ssh-agent@v0.2.0
