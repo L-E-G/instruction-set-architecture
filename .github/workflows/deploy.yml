@@ -12,7 +12,9 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install Dependencies 📦
-      run: apt get install pandoc
+      run: |
+        apt-get update
+        apt-get install -y pandoc
     
     - name: Build PDF 🛠️
       run: pandic --wrap=preserve -o DESIGN.pdf DESIGN.md
