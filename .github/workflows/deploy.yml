@@ -14,7 +14,7 @@ jobs:
     - name: Install Dependencies 📦
       run: |
         sudo apt-get update
-        sudo apt-get install -y pandoc texlive-full
+        sudo apt-get install -y pandoc texlive-latex-base texlive-latex-extra texlive-fonts-recommended
     
     - name: Build PDF 🛠️
       run: pandoc --wrap=preserve -o DESIGN.pdf DESIGN.md
