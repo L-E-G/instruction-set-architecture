@@ -20,7 +20,7 @@ jobs:
       run: |
         mkdir deploy
         pandoc --wrap=preserve -o deploy/DESIGN.pdf DESIGN.md
-        tree
+        tree -a
 
     - name: Install SSH Client 🛰️
       uses: webfactory/ssh-agent@v0.2.0
