@@ -13,8 +13,8 @@ jobs:
 
     - name: Install Dependencies 📦
       run: |
-        apt-get update
-        apt-get install -y pandoc
+        sudo apt-get update
+        sudo apt-get install -y pandoc
     
     - name: Build PDF 🛠️
       run: pandic --wrap=preserve -o DESIGN.pdf DESIGN.md
