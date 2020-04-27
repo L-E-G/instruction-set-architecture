@@ -1,0 +1,30 @@
+name: Continuous Deploy
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Branch 📥
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies 📦
+      run: apt get install pandoc
+    
+    - name: Build PDF 🛠️
+      run: pandic --wrap=preserve -o DESIGN.pdf DESIGN.md
+
+    - name: Install SSH Client 🛰️
+      uses: webfactory/ssh-agent@v0.2.0
+      with:
+        ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+      
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      with:
+        SSH: true
+        BRANCH: gh-pages
+        FOLDER: public
