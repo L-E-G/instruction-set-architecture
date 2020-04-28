@@ -467,7 +467,6 @@ There are 3 instruction types:
 
 - Add
 - Subtract
-- Divide
 - Multiply
 
 Typed general instructions:
