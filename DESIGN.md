@@ -493,43 +493,43 @@ Untyped general instructions:
 
 The operation field of each ALU instruction has the following meaning:
 
-| Binary   | Operation                                             |
-| -------  | -------------                                         |
-| `000001` | Add unsigned integer register direct                  |
-| `000010` | Add signed integer register direct                    |
-| `000011` | Add unsigned integer immediate                        |
-| `000100` | Add signed integer immediate                          |
-| `000101` | Subtract unsigned integer register direct             |
-| `000110` | Subtract signed integer register direct               |
-| `000111` | Subtract unsigned integer immediate                   |
-| `001000` | Subtract signed integer immediate                     |
-| `001001` | Multiply unsigned integer register direct             |
-| `001010` | Multiply signed integer register direct               |
-| `001011` | Multiply unsigned integer immediate                   |
-| `001100` | Multiply signed integer immediate                     |
-| -        | -                                                     |
-| `001101` | Move                                                  |
-| -        | -                                                     |
-| `001110` | Compare                               |
-| -        | -                                                     |
-| `001111` | Arithmetic shift left register direct  |
-| `010000` | Arithmetic shift right register direct |
-| `010001` | Arithmetic shift left immediate        |
-| `010010` | Arithmetic shift right immediate       |
-| -        | -                                                     |
-| `010011` | Logical shift left register direct                    |
-| `010100` | Logical shift left immediate                          |
-| `010101` | Logical shift right register direct                   |
-| `010110` | Logical shift right immediate                         |
-| -        | -                                                     |
-| `010111` | And register direct                                   |
-| `011000` | And immediate                                         |
-| `011001` | Or register direct                                    |
-| `011010` | Or immediate                                          |
-| `011011` | Xor register direct                                   |
-| `011100` | Xor immediate                                         |
-| -        | -                                                     |
-| `011101` | Not                                                   |
+| Decimal | Operation                                 |
+| ------- | -------------                             |
+| `0`     | Add unsigned integer register direct      |
+| `1`     | Add signed integer register direct        |
+| `2`     | Add unsigned integer immediate            |
+| `3`     | Add signed integer immediate              |
+| `4`     | Subtract unsigned integer register direct |
+| `5`     | Subtract signed integer register direct   |
+| `6`     | Subtract unsigned integer immediate       |
+| `7`     | Subtract signed integer immediate         |
+| `8`     | Multiply unsigned integer register direct |
+| `9`     | Multiply signed integer register direct   |
+| `10`    | Multiply unsigned integer immediate       |
+| `11`    | Multiply signed integer immediate         |
+| -       | -                                         |
+| `12`    | Move                                      |
+| -       | -                                         |
+| `13`    | Compare                                   |
+| -       | -                                         |
+| `14`    | Arithmetic shift left register direct     |
+| `15`    | Arithmetic shift right register direct    |
+| `16`    | Arithmetic shift left immediate           |
+| `17`    | Arithmetic shift right immediate          |
+| -       | -                                         |
+| `18`    | Logical shift left register direct        |
+| `19`    | Logical shift left immediate              |
+| `20`    | Logical shift right register direct       |
+| `21`    | Logical shift right immediate             |
+| -       | -                                         |
+| `22`    | And register direct                       |
+| `23`    | And immediate                             |
+| `24`    | Or register direct                        |
+| `25`    | Or immediate                              |
+| `26`    | Xor register direct                       |
+| `27`    | Xor immediate                             |
+| -       | -                                         |
+| `28`    | Not                                       |
 
 ### Arithmetic Instructions
 **Assembly**:
