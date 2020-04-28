@@ -314,6 +314,25 @@ directly into memory.
 Program execution will begin at memory address 0. The program should be 
 terminated by a [Halt](#halt) instruction.
 
+# Assembly Format
+One instruction per line. The first token in a line is a label. If no label is
+desired put a blank space. The following tokens may be the mnemonics documented 
+in the instructions section.
+
+Immediate use the following syntax:
+
+- `0dNN`: For unsigned decimal immediate values
+- `0xNN`: For unsigned hexadecimal immediate values
+- `0bNN`: For unsigned binary immediate values
+- `0sdNN`: For signed decimal immediate values
+- `0sxNN`: For signed hexadecimal immediate values
+- `0sbNN`: For signed binary immediate values
+
+The assembler will convert all immediate values to binary.
+
+Any tokens after the `#` character will not be interpreted, use this 
+for comments.
+
 # Instructions
 ## Assembly Documentation Syntax
 Instruction assembly is documented using the following syntax:
@@ -558,6 +577,8 @@ appending `{TYPE}`:
 | -------- | ---------------- |
 | `U`     | Unsigned integer |
 | `S`     | Signed integer   |
+
+`{TYPE}` defaults to unsigned integer mode.
 
 **Operands**:
 
