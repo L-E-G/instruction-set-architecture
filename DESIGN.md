@@ -239,36 +239,25 @@ arithmetic operations, called condition codes.
 The most significant bit is an interrupt flag.
 
 ## Condition Codes
-The special condition code `11111` is used to denote a null status `NS`.  
+The special condition code `00000` is used to denote a null status `NS`.  
 This code will match every other condition code.
 
 Valid codes are:
 
 | Binary  | Assembly | Meaning                         |
 | ------  | -------- | ------------------------        |
-| `00000` | `NE`     | Not equal                       |
-| `00001` | `E`      | Equal                           |
-| `00010` | `GT`     | Greater than                    |
-| `00011` | `LT`     | Less than                       |
-| `00100` | `GTE`    | Greater than or equal to        |
-| `00101` | `LTE`    | Less than or equal to           |
-| `00111` | `OF`     | Overflow                        |
-| `01000` | `Z`      | Zero                            |
-| `01001` | `NZ`     | Not zero                        |
-| `01010` | `NEG`    | Negative                        |
-| `01011` | `POS`    | Positive                        |
-| `11111` | `NS`     | Null status, matches everything |
-
-Status codes specifically for floats:
-
-| Binary  | Assembly | Meaning       |
-| ------  | -------- | ------------- |
-| `01010` | `UF`     | Underflow     |
-| `01011` | `NAN`    | Not a number  |
-| `01100` | `NM`     | Normalized    |
-| `01101` | `INF`    | Infinity      |
-| `01110` | `MS`     | Mantissa sign |
-| `01111` | `ES`     | Exponent sign |
+| `00000` | `NS`     | Null status, matches everything |
+| `00001` | `NE`     | Not equal                       |
+| `00010` | `E`      | Equal                           |
+| `00011` | `GT`     | Greater than                    |
+| `00100` | `LT`     | Less than                       |
+| `00101` | `GTE`    | Greater than or equal to        |
+| `00111` | `LTE`    | Less than or equal to           |
+| `01000` | `OF`     | Overflow                        |
+| `01001` | `Z`      | Zero                            |
+| `01010` | `NZ`     | Not zero                        |
+| `01011` | `NEG`    | Negative                        |
+| `01100` | `POS`    | Positive                        |
 
 ## Interrupt Flag
 The interrupt flag signifies if an interrupt is currently being handled.  
@@ -282,14 +271,20 @@ The interrupt handler register holds the memory address for a subroutine which
 will handle an interrupt. Initially this register is set to all 1's, which means
 the handler is unset. 
 
-The [Set Interrupt Handler](#set-interrupt-handler) instruction can be used to
-set this register.  
+The simulator will internally trigger interrupts by doing the following:
 
-The [Perform Interrupt](#perform-interrupt) instruction will be used internally 
-by the simulator to trigger an interupt
+- Check if the interrupt flag in the status register is set, if so 
+  do nothing
+- If the interrupt handler register is all 1's the interrupt handler is not set,
+  do nothing
+- Set the interrupt flag in the status register
+- Store the interrupt code in memory at address 
+  `1111 1111 1111 1111 1111 1111 1111 1111`
+- Set the interrupt link register to the program counter
+- Set the program counter to the value of the interrupt handler register
 
-After the interrupt handler is done it must call 
-[Jump Out Of Interrupt](#jump-out-of-interrupt).
+After the interrupt handler is done it must call perform a return from interrupt
+[Jump](#jump)
 
 The interrupt code identifies the cause of the interrupt.  
 When an interrupt occurs it will be loaded into main memory at 
@@ -398,11 +393,10 @@ Indicates that the `{TYPE}` parameter is optional. However the `<OP1>` operand
 is still required.
 
 ## Data Types
-There are 3 data types which are supported in instructions:  
+There are 2 data types which are supported in instructions:  
 
 - 32 bit two's complement integer
 - 32 bit unsigned integer
-- 32 bit IEEE 754 float
 
 Instructions have type variations when it matters, bit level operations do not.
 
@@ -430,15 +424,13 @@ There are 3 instruction types:
 
 | Type Field Binary | Type     |
 | ----------------- | -------  |
-| `00`              | ALU      |
-| `01`              | Memory   |
-| `10`              | Control  |
+| `00`              | Control  |
+| `01`              | ALU      |
+| `10`              | Memory   |
 | `11`              | Graphics |
 
 ## Arithmetic Logic Unit
 **Instructions**:
-
-36 total instructions.
 
 [Typed arithmetic instructions](#arithmetic-instructions):
 
@@ -475,53 +467,43 @@ The operation field of each ALU instruction has the following meaning:
 | -------  | -------------                                         |
 | `000001` | Add unsigned integer register direct                  |
 | `000010` | Add signed integer register direct                    |
-| `000011` | Add float register direct                             |
-| `000100` | Add unsigned integer immediate                        |
-| `000101` | Add signed integer immediate                          |
-| `000110` | Add float immediate                                   |
-| `000111` | Subtract unsigned integer register direct             |
-| `001000` | Subtract signed integer register direct               |
-| `001001` | Subtract float register direct                        |
-| `001010` | Subtract unsigned integer immediate                   |
-| `001011` | Subtract signed integer immediate                     |
-| `001100` | Subtract float immediate                              |
-| `001101` | Divide unsigned integer register direct               |
-| `001110` | Divide signed integer register direct                 |
-| `001111` | Divide float register direct                          |
-| `010000` | Divide unsigned integer immediate                     |
-| `010001` | Divide signed integer immediate                       |
-| `010010` | Divide float immediate                                |
-| `010011` | Multiply unsigned integer register direct             |
-| `010100` | Multiply signed integer register direct               |
-| `010101` | Multiply float register direct                        |
-| `010110` | Multiply unsigned integer immediate                   |
-| `010111` | Multiply signed integer immediate                     |
-| `011000` | Multiply float immediate                              |
+| `000011` | Add unsigned integer immediate                        |
+| `000100` | Add signed integer immediate                          |
+| `000101` | Subtract unsigned integer register direct             |
+| `000110` | Subtract signed integer register direct               |
+| `000111` | Subtract unsigned integer immediate                   |
+| `001000` | Subtract signed integer immediate                     |
+| `001001` | Divide unsigned integer register direct               |
+| `001010` | Divide signed integer register direct                 |
+| `001011` | Divide unsigned integer immediate                     |
+| `001100` | Divide signed integer immediate                       |
+| `001101` | Multiply unsigned integer register direct             |
+| `001111` | Multiply signed integer register direct               |
+| `010000` | Multiply unsigned integer immediate                   |
+| `010001` | Multiply signed integer immediate                     |
 | -        | -                                                     |
-| `011001` | Move                                                  |
+| `010010` | Move                                                  |
 | -        | -                                                     |
-| `011010` | Compare unsigned integer                              |
-| `011011` | Compare signed integer                                |
-| `011100` | Compare float                                         |
+| `010011` | Compare                               |
 | -        | -                                                     |
-| `011101` | Arithmetic shift left register direct  |
-| `011110` | Arithmetic shift right register direct |
-| `011111` | Arithmetic shift left immediate        |
-| `100000` | Arithmetic shift right immediate       |
+| `010100` | Arithmetic shift left register direct  |
+| `010101` | Arithmetic shift right register direct |
+| `010111` | Arithmetic shift left immediate        |
+| `011000` | Arithmetic shift right immediate       |
 | -        | -                                                     |
-| `100001` | Logical shift left register direct                    |
-| `100010` | Logical shift left immediate                          |
-| `100011` | Logical shift right register direct                   |
-| `100100` | Logical shift right immediate                         |
+| `011001` | Logical shift left register direct                    |
+| `011010` | Logical shift left immediate                          |
+| `011011` | Logical shift right register direct                   |
+| `011100` | Logical shift right immediate                         |
 | -        | -                                                     |
-| `100101` | And register direct                                   |
-| `100110` | And immediate                                         |
-| `100111` | Or register direct                                    |
-| `101000` | Or immediate                                          |
-| `101001` | Xor register direct                                   |
-| `101010` | Xor immediate                                         |
+| `011101` | And register direct                                   |
+| `011111` | And immediate                                         |
+| `100000` | Or register direct                                    |
+| `100001` | Or immediate                                          |
+| `100010` | Xor register direct                                   |
+| `100011` | Xor immediate                                         |
 | -        | -                                                     |
-| `101011` | Not                                                   |
+| `100100` | Not                                                   |
 
 ### Arithmetic Instructions
 **Assembly**:
@@ -530,7 +512,7 @@ The operation field of each ALU instruction has the following meaning:
 {OPERATION}{TYPE} <DEST> <OP1> <OP2>
 ```
 
-4 operations * 3 types * 2 addressing modes = 24 total instructions.
+4 operations * 2 types * 2 addressing modes = 16 total instructions.
 
 **Bit Organization**:
 
@@ -564,7 +546,6 @@ appending `{TYPE}`:
 | -------- | ---------------- |
 | `UI`     | Unsigned integer |
 | `SI`     | Signed integer   |
-| `F`      | Float            |
 
 **Operands**:
 
@@ -602,7 +583,7 @@ Transfers the contents of the `<SRC>` register to the `<DEST>` register.
 CMP[{TYPE}] <OP1> <OP2>
 ```
 
-3 types = 3 total instructions.
+1 instruction.
 
 **Bit Organization**:
 
@@ -613,17 +594,6 @@ CMP[{TYPE}] <OP1> <OP2>
 **Behavior**:
 
 Compares `<OP1>` to `<OP2>` and stores the result in the status register.  
-
-Each operand must be the same type, which is specified by appending `{TYPE}`:
-
-| `{TYPE}` | Type             |
-| -------- | ---------------- |
-| `UI`     | Unsigned integer |
-| `SI`     | Signed integer   |
-| `F`      | Float            |
-
-If `{TYPE}` is not specified the assembler will default to 
-`{TYPE} = Unsigned integer` since this is equivalent to a bit wise compare.
 
 **Operands**:
 
@@ -928,27 +898,49 @@ into the `<DEST>` register. Then increments the stack pointer register by one.
 
 ## Control
 
+- [Halt](#halt)
 - [Jump](#jump)
-- [Set Interrupt Handler](#set-interrupt-handler)
-- [Perform Interrupt](#perform-interrupt)
-- [Jump Out Of Interrupt](#jump-out-of-interrupt)
 
 **Bit Organization**:
 
 The operation field of each memory instruction has the following meaning:
 
-| Binary   | Operation             |
-| -------- | ---------             |
-| 00       | Jump                  |
-| 01       | Set Interrupt Handler |
-| 10       | Perform Interrupt     |
-| 11       | Jump Out Of Interrupt |
+| Binary   | Operation |
+| -------- | --------- |
+| `0`      | Halt      |
+| `1`      | Jump      |
 
+### Halt
+**Assembly**:
+```
+HALT
+```
+
+1 instruction.
+
+**Bit Organization**:
+
+| Condition | Type | Operation | Not Used |
+| --------- | ---- | --------- | -------- |
+| 5         | 2    | 1         | 24       |
+
+**Behavior**:
+
+Signals to the hardware that the program is done running. Any instructions after
+this will not be interpreted.
+
+Note that due to the way the bit pattern is constructed a memory value of `0`
+will be interpreted as a halt instruction:
+
+- Condition `00000` is the null status
+- Type `00` is the control type
+- Operation `0` is the halt instruction
+- The rest of the bits are unused
 
 ### Jump
 **Assembly**:
 ```
-<CONDITION>JMP{IS_SUBROUTINE} <ADDR>
+<CONDITION>JMP{SPECIAL} <ADDR>
 ```
 
 2 addressing modes = 2 total instructions.
@@ -959,28 +951,39 @@ Register direct:
 
 | Condition | Type | Operation | `<ADDR>` | Not Used |
 | --------- | ---- | --------- | -------- | -------- |
-| 5         | 2    | 2         | 5        | 18       |
+| 5         | 2    | 1         | 5        | 19       |
 
 Immediate:
 
 | Condition | Type | Operation | `<ADDR>` |
 | --------- | ---- | --------- | -------- |
-| 5         | 2    | 2         | 23       |
+| 5         | 2    | 1         | 24       |
 
 **Behavior**:
 
 Conditionally executes a jump based on if the `<CONDITION>` operand matches the
 condition in the status register.
 
-The type of jump is determined by `{IS_SUBROUTINE}`:
+By default jump just sets the program counter as described in the next 
+paragraph. The `{SPECIAL}` part of the instruction can be set to perform a
+modified behavior jump:
 
-| `{IS_SUBROUTINE}` | Behavior        |
-| ----------------- | --------        |
-| `S`               | Subroutine jump |
-| `(Empty) `        | Normal jump     |
+| `{SPECIAL}` | Behavior                   |
+| ----------- | --------                   |
+| `S`         | Subroutine jump            |
+| `I`         | Return from interrupt jump |
+| `(Empty) `  | Normal jump                |
 
 A subroutine jump sets the link register to the program counter register 
 plus one. Then it performs a normal jump.
+
+A return from interrupt jump performs the following actions:
+
+- Checks if the interrupt flag is set in the status register, if not exits 
+  the instruction
+- Sets the interrupt flag in the set status register to false
+- Sets the program counter to the value in the interrupt link register
+- Then performs a normal jump to the value stored in the interrupt link register
 
 A normal jump sets the program counter register to the value specified by the
 `<ADDR>` operand.
@@ -993,94 +996,7 @@ the program counter and the program counter is set to the result.
 
 **Operands**:
 
-- `<ADDR>`: Register containing new program counter value or a 23-bit immediate
-
-### Set Interrupt Handler
-**Assembly**:  
-
-```
-SIH <ADDR>
-```
-
-**Bit Organization**:  
-
-| Condition | Type | Operation | `<ADDR>`  | Not Used |
-| --------- | ---- | --------- | --------- | -------- |
-| 4         | 2    | 2         | 5         | 19       |
-
-**Behavior**:  
-
-Sets the interrupt handler register to `<ADDR>`.
-
-**Operands**:  
-
-- `<ADDR>`: Register containing address of interrupt handler
-
-### Perform Interrupt
-**Assembly**:  
-
-```
-INT <CODE>
-```
-
-**Bit Organization**:  
-
-Register direct:  
-
-| Condition | Type | Operation | `<CODE>`  | Not Used |
-| --------- | ---- | --------- | --------- | -------- |
-| 4         | 2    | 2         | 5         | 19       |
-
-Immediate:  
-
-| Condition | Type | Operation | `<CODE>`  | Not Used |
-| --------- | ---- | --------- | --------- | -------- |
-| 4         | 2    | 2         | 4         | 20       |
-
-**Behavior**:  
-
-Internal instruction, can only be executed if inserted by the simulator.  
-
-Performs an interrupt by doing the following:  
-
-- Check if the interrupt flag in the status register is set, if so 
-  exit instruction
-- If the interrupt handler register is all 1's the interrupt handler is not set,
-  exit the instruction
-- Set the interrupt flag in the status register
-- Place the interrupt code at `1111 1111 1111 1111 1111 1111 1111 1111` in 
-  main memory
-- Set the interrupt link register to the program counter
-- Set the program counter to the value of the interrupt handler register
-
-**Operands**:  
-
-- `<CODE>`: Register or 4-bit immediate which is the interrupt code
-
-### Jump Out Of Interrupt
-**Assembly**:  
-
-```
-IJMP
-```
-
-**Bit Organization**:  
-
-
-| Condition | Type | Operation | Not Used |
-| --------- | ---- | --------- | -------- |
-| 4         | 2    | 2         | 24       |
-
-**Behavior**:  
-
-A special jump instruction for returning from interrupts.  
-
-Performs the following actions:
-
-- Checks if the interrupt flag is set in the status register, if not exits 
-  the instruction
-- Sets the interrupt flag in the set status register to false
-- Sets the program counter to the value in the interrupt link register
+- `<ADDR>`: Register containing new program counter value or a 24-bit immediate
 
 ## Graphics
 8 total instructions.
