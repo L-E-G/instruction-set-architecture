@@ -556,8 +556,8 @@ appending `{TYPE}`:
 
 | `{TYPE}` | Type             |
 | -------- | ---------------- |
-| `UI`     | Unsigned integer |
-| `SI`     | Signed integer   |
+| `U`     | Unsigned integer |
+| `S`     | Signed integer   |
 
 **Operands**:
 
