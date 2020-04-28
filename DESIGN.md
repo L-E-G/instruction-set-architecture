@@ -316,8 +316,8 @@ terminated by a [Halt](#halt) instruction.
 
 # Assembly Format
 One instruction per line. The first token in a line is a label. If no label is
-desired put a blank space. The following tokens may be the mnemonics documented 
-in the instructions section.
+desired put a blank space or tab. The following tokens may be the mnemonics 
+documented in the instructions section.
 
 Immediate use the following syntax:
 
@@ -504,37 +504,33 @@ The operation field of each ALU instruction has the following meaning:
 | `000110` | Subtract signed integer register direct               |
 | `000111` | Subtract unsigned integer immediate                   |
 | `001000` | Subtract signed integer immediate                     |
-| `001001` | Divide unsigned integer register direct               |
-| `001010` | Divide signed integer register direct                 |
-| `001011` | Divide unsigned integer immediate                     |
-| `001100` | Divide signed integer immediate                       |
-| `001101` | Multiply unsigned integer register direct             |
-| `001111` | Multiply signed integer register direct               |
-| `010000` | Multiply unsigned integer immediate                   |
-| `010001` | Multiply signed integer immediate                     |
+| `001001` | Multiply unsigned integer register direct             |
+| `001010` | Multiply signed integer register direct               |
+| `001011` | Multiply unsigned integer immediate                   |
+| `001100` | Multiply signed integer immediate                     |
 | -        | -                                                     |
-| `010010` | Move                                                  |
+| `001101` | Move                                                  |
 | -        | -                                                     |
-| `010011` | Compare                               |
+| `001110` | Compare                               |
 | -        | -                                                     |
-| `010100` | Arithmetic shift left register direct  |
-| `010101` | Arithmetic shift right register direct |
-| `010111` | Arithmetic shift left immediate        |
-| `011000` | Arithmetic shift right immediate       |
+| `001111` | Arithmetic shift left register direct  |
+| `010000` | Arithmetic shift right register direct |
+| `010001` | Arithmetic shift left immediate        |
+| `010010` | Arithmetic shift right immediate       |
 | -        | -                                                     |
-| `011001` | Logical shift left register direct                    |
-| `011010` | Logical shift left immediate                          |
-| `011011` | Logical shift right register direct                   |
-| `011100` | Logical shift right immediate                         |
+| `010011` | Logical shift left register direct                    |
+| `010100` | Logical shift left immediate                          |
+| `010101` | Logical shift right register direct                   |
+| `010110` | Logical shift right immediate                         |
 | -        | -                                                     |
-| `011101` | And register direct                                   |
-| `011111` | And immediate                                         |
-| `100000` | Or register direct                                    |
-| `100001` | Or immediate                                          |
-| `100010` | Xor register direct                                   |
-| `100011` | Xor immediate                                         |
+| `010111` | And register direct                                   |
+| `011000` | And immediate                                         |
+| `011001` | Or register direct                                    |
+| `011010` | Or immediate                                          |
+| `011011` | Xor register direct                                   |
+| `011100` | Xor immediate                                         |
 | -        | -                                                     |
-| `100100` | Not                                                   |
+| `011101` | Not                                                   |
 
 ### Arithmetic Instructions
 **Assembly**:
@@ -543,7 +539,7 @@ The operation field of each ALU instruction has the following meaning:
 {OPERATION}{TYPE} <DEST> <OP1> <OP2>
 ```
 
-4 operations * 2 types * 2 addressing modes = 16 total instructions.
+3 operations * 2 types * 2 addressing modes = 12 total instructions.
 
 **Bit Organization**:
 
@@ -567,7 +563,6 @@ Performs a basic arithmetic operation, determine by `{OPERATION}`:
 | ------------- | --------------- |
 | `ADD`         | `<OP1> + <OP2>` |
 | `SUB`         | `<OP1> - <OP2>` |
-| `DIV`         | `<OP1> / <OP2>` |
 | `MLT`         | `<OP1> * <OP2>` |
 
 The type of numbers used in the arithmetic operation is specified by 
