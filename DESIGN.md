@@ -302,6 +302,18 @@ Interrupts codes can have the following values:
 | `0101` | `ESCAPE`     | Escape key      |
 | `0110` | `SPACE`      | Space key       |
 
+# Binary Format
+Once programs are assembled they will be in the LEG binary format. 
+
+The format is simple: 
+
+A little endian binary file. Every 32 bits will be interpreted as a memory 
+address. Memory addresses will increment by one. The contents will be loaded 
+directly into memory.
+
+Program execution will begin at memory address 0. The program should be 
+terminated by a [Halt](#halt) instruction.
+
 # Instructions
 ## Assembly Documentation Syntax
 Instruction assembly is documented using the following syntax:
