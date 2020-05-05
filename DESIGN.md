@@ -988,13 +988,13 @@ Register direct:
 
 | Condition | Type | Operation | `<ADDR>` | Not Used |
 | --------- | ---- | --------- | -------- | -------- |
-| 5         | 2    | 1         | 5        | 19       |
+| 5         | 2    | 3         | 5        | 19       |
 
 Immediate:
 
 | Condition | Type | Operation | `<ADDR>` |
 | --------- | ---- | --------- | -------- |
-| 5         | 2    | 1         | 24       |
+| 5         | 2    | 3         | 24       |
 
 **Behavior**:
 
