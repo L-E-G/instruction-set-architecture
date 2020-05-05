@@ -804,12 +804,12 @@ The operation field of each memory instruction has the following meaning:
 
 | Binary   | Operation             |
 | -------- | ---------             |
-| `000`    | Load register direct  |
-| `001`    | Load immediate        |
-| `010`    | Store register direct |
-| `011`    | Store immediate       |
-| `100`    | Push                  |
-| `101`    | Pop                   |
+| `0`    | Load register direct  |
+| `1`    | Load immediate        |
+| `2`    | Store register direct |
+| `3`    | Store immediate       |
+| `4`    | Push                  |
+| `5`    | Pop                   |
 
 ### Load
 **Assembly**:
@@ -959,7 +959,7 @@ HALT
 
 | Condition | Type | Operation | Not Used |
 | --------- | ---- | --------- | -------- |
-| 5         | 2    | 1         | 24       |
+| 5         | 2    | 3         | 21       |
 
 **Behavior**:
 
@@ -980,7 +980,7 @@ will be interpreted as a halt instruction:
 <CONDITION>JMP{SPECIAL} <ADDR>
 ```
 
-2 addressing modes = 2 total instructions.
+2 addressing modes + 2 types + 1 special interrupt = 5 total instructions.
 
 **Bit Organization**:
 
