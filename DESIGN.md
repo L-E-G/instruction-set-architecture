@@ -468,6 +468,7 @@ There are 3 instruction types:
 - Add
 - Subtract
 - Multiply
+- Divide
 
 Typed general instructions:
 
@@ -507,29 +508,33 @@ The operation field of each ALU instruction has the following meaning:
 | `9`     | Multiply signed integer register direct   |
 | `10`    | Multiply unsigned integer immediate       |
 | `11`    | Multiply signed integer immediate         |
+| `12`    | Divide unsigned integer register direct   |
+| `13`    | Divide signed integer register direct     |
+| `14`    | Divide unsigned integer immediate         |
+| `15`    | Divide signed integer immediate           |
 | -       | -                                         |
-| `12`    | Move                                      |
+| `16`    | Move                                      |
 | -       | -                                         |
-| `13`    | Compare                                   |
+| `17`    | Compare                                   |
 | -       | -                                         |
-| `14`    | Arithmetic shift left register direct     |
-| `15`    | Arithmetic shift right register direct    |
-| `16`    | Arithmetic shift left immediate           |
-| `17`    | Arithmetic shift right immediate          |
+| `18`    | Arithmetic shift left register direct     |
+| `19`    | Arithmetic shift right register direct    |
+| `20`    | Arithmetic shift left immediate           |
+| `21`    | Arithmetic shift right immediate          |
 | -       | -                                         |
-| `18`    | Logical shift left register direct        |
-| `19`    | Logical shift left immediate              |
-| `20`    | Logical shift right register direct       |
-| `21`    | Logical shift right immediate             |
+| `22`    | Logical shift left register direct        |
+| `23`    | Logical shift left immediate              |
+| `24`    | Logical shift right register direct       |
+| `25`    | Logical shift right immediate             |
 | -       | -                                         |
-| `22`    | And register direct                       |
-| `23`    | And immediate                             |
-| `24`    | Or register direct                        |
-| `25`    | Or immediate                              |
-| `26`    | Xor register direct                       |
-| `27`    | Xor immediate                             |
+| `26`    | And register direct                       |
+| `27`    | And immediate                             |
+| `28`    | Or register direct                        |
+| `29`    | Or immediate                              |
+| `30`    | Xor register direct                       |
+| `31`    | Xor immediate                             |
 | -       | -                                         |
-| `28`    | Not                                       |
+| `32`    | Not                                       |
 
 ### Arithmetic Instructions
 **Assembly**:
@@ -563,6 +568,7 @@ Performs a basic arithmetic operation, determine by `{OPERATION}`:
 | `ADD`         | `<OP1> + <OP2>` |
 | `SUB`         | `<OP1> - <OP2>` |
 | `MLT`         | `<OP1> * <OP2>` |
+| `DIV`         | `<OP1> / <OP2>` |
 
 The type of numbers used in the arithmetic operation is specified by 
 appending `{TYPE}`:
@@ -935,7 +941,11 @@ The operation field of each memory instruction has the following meaning:
 | Binary   | Operation |
 | -------- | --------- |
 | `0`      | Halt      |
-| `1`      | Jump      |
+| `1`      | Jump Register Direct      |
+| `2`      | Jump Immediate     |
+| `3`      | Jump Subroutine Reg. Dir.     |
+| `4`      | Jump Subroutine Imm.     |
+| `5`      | Jump Return From Interrupt     |
 
 ### Halt
 **Assembly**:
@@ -1039,10 +1049,13 @@ The operation field of each graphics instruction has the following meaning:
 
 | Binary | Meaning                           |
 | ------ | -------                           |
-| 00     | Load Sprite                       |
-| 01     | Set Bit Block Transfer Memory     |
-| 10     | Set Bit Block Transfer Dimensions |
-| 11     | Bit Block Transfer                |
+| `1`    | Load Sprite Register Direct      |
+| `2`    | Load Sprite Immediate      |
+| `3`    | Set Bit Block Transfer Memory     |
+| `4`    | Set Bit Block Transfer Dimensions Reg. Dir. |
+| `5`    | Set Bit Block Transfer Dimensions Imm. |
+| `6`    | Bit Block Transfer Reg. Dir.               |
+| `7`    | Bit Block Transfer Imm.               |
 
 
 ### Load Sprite
