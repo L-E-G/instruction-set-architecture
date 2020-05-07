@@ -48,14 +48,89 @@ correctness of the new features.
 If bugs are fixed regression tests must be added to ensure the bug is fixed and 
 does not occur again.
 
+# What We Learned
+
+## Rob
+
+I learned a tremendous amount after completing this project, and I feel like I now have a solid understanding of how code gets ran on a processor.  We get taught most of this material from CS 335, like pipelines, memory, and assemblers, but after completing this project I now feel that I have solidified that knowledge.  
+
+In the pipeline, for example, I remember going through the slides that covered the pipeline in 335 so that I could study for the test, and I thought I knew what I knew how it worked.  But what I failed to understand is the little things that help make the pipeline work.  Like how the interactions get loaded into memory, and the program counter keep track of which instruction to fetch.  And when we preform a jump all we're doing is changing the program counter to the address of the instruction we want to start from.  
+
+Another example is with the assembler.  I remember learning that it loops through the instruction twice, but I never understood why.  Now that I have implemented an assembler, it makes total sense why we do that.  Not only does it makes the work easier since all I need to do it grab the info that I need, but also we can learn the locations of the labels so that we can insert the positions of those into the jumps.  After creating the assembler, this all makes sense.
+
+This project has given me loads of respect for the engineers behind todays processors and ISAs.  I had no idea the complexity of work that goes into making something like this, and this is only a simulator.
+
+# How the Simulator works
+
+The simulator is set up in 5 different sections, each of which I will link to their respective sections below is applicable:
+ - [Memory](#memory)
+ - [Instructions](#instructions)
+ - [GUI](#gui)
+ - [Pipeline](#pipeline)
+ - [Assembler](#assembler)
+
+The pipeline is what control the program.  This is where all the instances of each of the sections lives, and where they are called.
+
+As assembly file will be loaded into the gui, and the contents of this file are passed back to the pipeline, where they are ran through the assembler, and then loaded into memory.  Then each time we step in the pipeline, an instruction will be pulled from memory and entered into the first stage of the pipeline.  This continues until the [HALT](#halt) instruction is reached, at which point the pipeline will wrap up, and empty.
+
+## GUI
+
+Our user interface utilizes a library called WASM to interact between the gui and the rust code.  WASM is different in that this actually compiles all the rust code into web assembly, so that our code can be accessed from a front end service.  
+
+We chose to write our front end in React, making our user interface look sleek and modern.  Because we used React, we had the ability to customize our user interface with ease and produce a professional looking interface.
+
+## Pipeline
+
+The pipeline includes 5 stages:
+- [Fetch](#fetch)
+- [Decode](#decode)
+- [Execute](#execute)
+- [Memory Access](#memoryaccess)
+- [Write Back](writeback)
+
+### Fetch
+
+This stage gets the next instruction in the memory specified by the value of `PC`.
+
+### Decode 
+
+This stage will unpack the instruction type bits and the operation code bits of the instruction, and create an instance of the instruction to be executed.
+
+### Execute
+
+This stage will perform whatever operation that the instruction calls for.
+
+### Memory Access
+
+If the instruction need to access memory, the instruction will do so in this stage.
+
+### Write back
+
+This stage will write back any values that were computed or found during the course of the instruction to a specified register.
+
+## Assembler
+
+This assembler works in two passes.  The first pass gathers the values needed to appropriately pack the bits, and the second pass packs the bits based on this gathered information.
+
+By performing two passes of the assembly instructions, we are able to point out where the labels are positioned so that we can accurately fill in the right value in the `JMP` instructions.
+
+# How to use Simulator
+
+The simulator can be accessed at this like: 
+
+We we use the WASM library and are able to compile our code into web assembly, we are able to use a front end for out GUI; we chose to use React.  Because of this, we can deploy our GUI so that everyone can use it whenever they want.  
+
+One on our website, you can begin using our simulator by uploading an assembly file by clicking on the button "Select File" under the Memory File section.  Your files will open up, and you can begin to navigate to your assembly file and click to upload.  Once uploaded, you will see the memory populate with your program.  
+
+To start the program, there are two options: First is to use the "Step" button, which will walk through the program one instruction at a time.  The other option is to use the "Run" button which will execute the entire program at once.
+
+When using the "Step" button, the pipeline will begin to fill up with your instructions, and you can watch the flow down the pipeline.  At the top the cycle count will grow as the program advances, and the `PC` value will change as the program steps.  If your program includes jumps, you can watch the `PC` value change as it jumps around the instructions in memory.
+
+There are a few options that can be set before executing the program: to run with or without cache, and to run with or without the pipeline.  When cache is set, the program will utilize the 3 layers of cache to store data.  When the cache is not set the program will use all DRAM to store data.  When the pipeline is set the program will execute all instructions through the pipeline.  When the pipeline is not set the program will execute all stages of the instruction at once.  
+
 # Memory
 **Endianess**: Little  
-**Memory Organization**: Harvard
-
-Memory is broken in to 2 parts:
-
-- Data and instructions
-- Graphics
+**Memory Organization**: Princeton
 
 ## Data and Instruction Memory
 **Word Size**: 32 bits  
@@ -72,102 +147,6 @@ store instructions.
 3. Level 3, SRAM: 8 MB, direct mapped (40 cycle delay)
 4. DRAM: $2^{32} \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
 
-## Graphics Memory
-The graphics memory is composed of SRAM.
-
-There are two main pieces of graphics memory which are interacted with 
-exclusively through custom instructions:
-
-- Frame buffer
-- Sprite library
-
-All graphics memory shares these underlying properties:  
-
-**Word Size**: 8 bits  
-**Addressing Unit**: Word
-
-Pixel organization in memory:
-
-8 bit pixels: 3 red, 3 green, 2 blue.  
-
-The first pixel defines the top left pixel in a display, the last pixel the 
-bottom right pixel in a display.  
-
-The width of the thing being displayed determines how many bytes there are
-per line. 
-
-### Frame Buffer
-**Address Space**: $2^{16}$  
-
-Holds pixels to be displayed to the user on a screen.  
-Screen size is 256 x 256 pixels.  
-
-Can only be manipulated by graphics instructions.
-
-**Memory Hierarchy**:
-
-1. SRAM: 64 KB (4 cycle delay)
-
-### Sprite Library
-A piece of memory designed to hold sprites so they can be operated on in a 
-quick fashion.
-
-**Address Space**: $2^{12}$  
-
-This memory can hold up to 1 128x64 or 64x128 sprite, or several 
-smaller sprites. 
-
-**Memory Hierarchy**:
-
-1. SRAM: 8 KB (11 cycle delay)
-
-# Sprite Processing Unit (Blitter)
-The architecture includes a specialized sprite processing unit.
-
-This unit is inspired by the [Atari ST BLITTER chip](http://www.atari-wiki.com/index.php/Blitter_manual).  
-
-Its purpose is to quickly transfer bits from the sprite library memory to the 
-frame buffer, while performing basic logic operations along the way.
-
-In the documentation this will be referred to as the "Blitter".
-
-## Blitter Registers
-The Blitter has 4 registers which it uses internally to determine how to 
-transfer data.  
-
-- Source: 12-bit address in sprite library memory marking the start of a sprite
-- Destination: 16-bit address in frame buffer memory to start copying sprite to
-- Width: 7-bit width of sprite
-- Height: 7-bit width of sprite
-
-These registers cannot be read by any component other than the Blitter.  
-They can only be set via graphics instructions.
-
-## Blitter Operations
-The Blitter can perform many different logical operations on the source against
-the destination and store the result:
-
-| Binary | Operation      |
-| ------ | -------------- |
-| `0000` | All zeros      |
-| `0001` | `SRC & DEST`   |
-| `0010` | `SRC & ~DEST`  |
-| `0011` | `SRC`          |
-| `0100` | `~SRC & DEST`  |
-| `0101` | `DEST`         |
-| `0110` | `SRC ^ DEST`   |
-| `0111` | `SRC | DEST`   |
-| `1000` | `~SRC & ~DEST` |
-| `1001` | `~SRC ^ DEST`  |
-| `1010` | `~DEST`        |
-| `1011` | `SRC | ~DEST`  |
-| `1100` | `~SRC`         |
-| `1101` | `~SRC | DEST`  |
-| `1110` | `~SRC | ~DEST` |
-| `1111` | All ones       |
-
-(These are the same operations the Atari Blitter supported)
-
 # Registers
 Referred to in assembly as `R#` where `#` is a number.  
 Some registers have aliases.  
@@ -178,24 +157,6 @@ Some registers have aliases.
 `R0` through `R25`.
 
 Initially all set to 0.
-
-## Interrupt Link Register
-32-bit register.  
-
-`R26`, `INTLR`.  
-
-Store the address to return to after an interrupt has completed.  
-Initially set to 0.
-
-## Interrupt Handler
-32-bit register.  
-
-`R27` or `IHDLR`.  
-
-Stores the memory address of the interrupt handler subroutine.  
-Initially set to all 1's to indicate it has not been set.  
-
-See the [Interrupts section](#interrupts) for details.
 
 ## Program Counter
 32-bit register.  
@@ -258,49 +219,6 @@ Valid codes are:
 | `01010` | `NZ`     | Not zero                        |
 | `01011` | `NEG`    | Negative                        |
 | `01100` | `POS`    | Positive                        |
-
-## Interrupt Flag
-The interrupt flag signifies if an interrupt is currently being handled.  
-A value of `0` means no interrupts are being handled and vise versa.
-
-If the interrupt flag is set no new interrupts can be handled. Any new 
-interrupts which come in will be ignored.
-
-# Interrupts
-The interrupt handler register holds the memory address for a subroutine which 
-will handle an interrupt. Initially this register is set to all 1's, which means
-the handler is unset. 
-
-The simulator will internally trigger interrupts by doing the following:
-
-- Check if the interrupt flag in the status register is set, if so 
-  do nothing
-- If the interrupt handler register is all 1's the interrupt handler is not set,
-  do nothing
-- Set the interrupt flag in the status register
-- Store the interrupt code in memory at address 
-  `1111 1111 1111 1111 1111 1111 1111 1111`
-- Set the interrupt link register to the program counter
-- Set the program counter to the value of the interrupt handler register
-
-After the interrupt handler is done it must call perform a return from interrupt
-[Jump](#jump)
-
-The interrupt code identifies the cause of the interrupt.  
-When an interrupt occurs it will be loaded into main memory at 
-address `1111 1111 1111 1111 1111 1111 1111 1111`.
-
-Interrupts codes can have the following values:
-
-| Binary | Assembly     | Meaning         |
-| ------ | --------     | -------         |
-| `0000` | `UPARROW`    | Up arrow key    |
-| `0001` | `DOWNARROW`  | Down arrow key  |
-| `0010` | `LEFTARROW`  | Left arrow key  |
-| `0011` | `RIGHTARROW` | Right arrow key |
-| `0100` | `ENTER`      | Enter key       |
-| `0101` | `ESCAPE`     | Escape key      |
-| `0110` | `SPACE`      | Space key       |
 
 # Binary Format
 Once programs are assembled they will be in the LEG binary format. 
@@ -441,15 +359,6 @@ Currently only the jump instructions use this condition field.
 All other instructions do not use this field at the moment, in the future they
 may. For right now the condition field will be set to null status.
 
-## Immediate Fields
-Most immediate fields, with the exception of those in graphics instruction, are 
-sign extended to 32-bits.  
-
-Graphics instructions do not extend their immediate fields because they deal 
-with multiple different address spaces. The size of these immediate fields has
-been carefully specified. See the [Graphics Memory section](#graphics-memory) 
-for more details.
-
 ## Instruction Types
 There are 3 instruction types:
 
@@ -543,7 +452,7 @@ The operation field of each ALU instruction has the following meaning:
 {OPERATION}{TYPE} <DEST> <OP1> <OP2>
 ```
 
-3 operations * 2 types * 2 addressing modes = 12 total instructions.
+5 operations * 2 types * 2 addressing modes = 20 total instructions.
 
 **Bit Organization**:
 
@@ -569,6 +478,7 @@ Performs a basic arithmetic operation, determine by `{OPERATION}`:
 | `SUB`         | `<OP1> - <OP2>` |
 | `MLT`         | `<OP1> * <OP2>` |
 | `DIV`         | `<OP1> / <OP2>` |
+| `MOD`         | `<OP1> % <OP2>` |
 
 The type of numbers used in the arithmetic operation is specified by 
 appending `{TYPE}`:
@@ -580,6 +490,8 @@ appending `{TYPE}`:
 
 `{TYPE}` defaults to unsigned integer mode.
 
+In the case that the MLT instruction yields a result that is larger than 32 bits, the result will be cut off, and only the first 32 least significant bits will be used.
+
 **Operands**:
 
 - `<DEST>`: Register to store result
@@ -589,7 +501,7 @@ appending `{TYPE}`:
 ### Move
 **Assembly**:
 ```
-MV <DEST> <SRC>
+MOV <DEST> <SRC>
 ```
 
 1 total instruction.
@@ -839,7 +751,7 @@ Reads a word of memory from the address specified by the `<ADDR>` register into
 the `<DEST>` register.
 
 If in the immediate form the address immediate is sign extended and added to the
-incremented program counter value.
+incremented program counter value: `PC + Immediate Value`.
 
 **Operands**:
 
@@ -875,7 +787,7 @@ Writes a word of data from the `<SRC>` register to the memory address specified
 by the `<ADDR>` register.
 
 If in the immediate form the address immediate is sign extended and added to the
-incremented program counter value.
+incremented program counter value: `PC + Immediate Value`.
 
 **Operands**:
 
@@ -945,7 +857,7 @@ The operation field of each memory instruction has the following meaning:
 | `2`      | Jump Immediate     |
 | `3`      | Jump Subroutine Reg. Dir.     |
 | `4`      | Jump Subroutine Imm.     |
-| `5`      | Jump Return From Interrupt     |
+| `5`      | No Op     |
 
 ### Halt
 **Assembly**:
@@ -971,7 +883,7 @@ will be interpreted as a halt instruction:
 
 - Condition `00000` is the null status
 - Type `00` is the control type
-- Operation `0` is the halt instruction
+- Operation `000` is the halt instruction
 - The rest of the bits are unused
 
 ### Jump
@@ -1035,174 +947,22 @@ the program counter and the program counter is set to the result.
 
 - `<ADDR>`: Register containing new program counter value or a 24-bit immediate
 
-## Graphics
-8 total instructions.
-
-- [Load Sprite](#load-sprite)
-- [Set Bit Block Transfer Memory](#set-bit-block-transfer-memory)
-- [Set Bit Block Transfer Dimensions](#set-bit-block-transfer-dimensions)
-- [Bit Block Transfer](#bit-block-transfer)
-
-**Bit Organization**:  
-
-The operation field of each graphics instruction has the following meaning:
-
-| Binary | Meaning                           |
-| ------ | -------                           |
-| `1`    | Load Sprite Register Direct      |
-| `2`    | Load Sprite Immediate      |
-| `3`    | Set Bit Block Transfer Memory     |
-| `4`    | Set Bit Block Transfer Dimensions Reg. Dir. |
-| `5`    | Set Bit Block Transfer Dimensions Imm. |
-| `6`    | Bit Block Transfer Reg. Dir.               |
-| `7`    | Bit Block Transfer Imm.               |
-
-
-### Load Sprite
-**Assembly**:  
+### No Op
+**Assembly**:
 ```
-GLOD <DEST> <SRC> <LEN>
+NOOP
 ```
 
-2 addressing modes = 2 total instructions.
+1 instruction.
 
-**Bit Organization**:  
+**Bit Organization**:
 
-Register direct:
+| Condition | Type | Operation | Not Used |
+| --------- | ---- | --------- | -------- |
+| 5         | 2    | 3         | 21       |
 
-| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Not Used |
-| --------- | ---- | --------- | -------- | ------- | ------- | -------- |
-| 5         | 2    | 2         | 5        | 5       | 5       | 20       |
+**Behavior**:
 
-Immediate:
+Special instruction that does not do anything in the program, and acts as a filler.  
 
-| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Not Used |
-| --------- | ---- | --------- | -------- | ------- | ------- | -------- |
-| 5         | 2    | 2         | 12       | 10      | 12      | 1        |
-
-**Behavior**:  
-
-Copies a sprite of length `<LEN>` bytes from `<SRC>` in main memory to 
-`<DEST>` in the sprite library memory.
-
-Both `<DEST>` and `<SRC>` are the start address of the sprite.  
-The memory region `SRC + CEILING(LEN / 4)` is copied from main memory 
-to the region `DEST + LEN` in sprite library memory.  
-
-It should be noted that `<DEST>` is an address in the sprite library memory's 
-8-bit word address space, and `<SRC>` is an address in the main memory's 32-bit 
-word address space.
-
-**Operands**:  
-
-- `<DEST>`: 12-bit immediate or first 12 least significant bits of a register 
-  indicating the address in the sprite library memory to start copying to
-- `<SRC>`: 10-bit signed integer added to the program counter or register 
-  holding the start address in main memory of the sprite
-- `<LEN>`: 12-bit immediate or first 12 least significant bits of a register
-  indicating the length of the sprite in bytes
-
-### Set Bit Block Transfer Memory
-**Assembly**:  
-```
-BLITMEM <SRC> <DEST>
-```
-
-1 addressing mode = 1 total instruction.
-
-**Bit Organization**:  
-
-| Condition | Type | Operation | `<SRC>` | `<DEST>` | Not Used |
-| --------- | ---- | --------- | ------- | -------- | -------- |
-| 5         | 2    | 2         | 5       | 5        | 13       |
-
-**Behavior**:  
-
-Sets the internal sprite library memory source address register of the Blitter
-to the first 12 bits contained in the `<SRC>` register. 
-
-Sets the frame buffer destination register of the Blitter to the first 16 bits 
-contained in the `<DEST>` register.
-
-**Operands**:  
-
-- `<SRC>`: Register who's first 12 least significant bits are an address to a
-  sprite's start in the sprite library memory.
-- `<DEST>`: Register who's first 16 least significant bits are an address to the
-  start location in the frame buffer.
-
-### Set Bit Block Transfer Dimensions
-**Assembly**:  
-```
-BLITDIMS <WIDTH> <HEIGHT>
-```
-
-2 addressing modes = 2 total instructions.
-
-**Bit Organization**:  
-
-Register direct:  
-
-| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
-| --------- | ---- | --------- | --------- | ---------- | -------- |
-| 5         | 2    | 2         | 5         | 5          | 13       |
-
-Immediate:  
-
-| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
-| --------- | ---- | --------- | --------- | ---------- | -------- |
-| 5         | 2    | 2         | 7         | 7          | 9        |
-
-**Behavior**:  
-
-Sets the internal width and height registers of the Blitter to the values 
-specified by the `<WIDTH>` and `<HEIGHT>` operands.
-
-**Operands**: 
-
-- `<WIDTH>`: 7-bit immediate value or register who's first 7 least significant
-  bits will be used as the Blitter's width value
-- `<HEIGHT>`: 7-bit immediate value or register who's first 7 least significant
-  bits will be used as the Blitter's height value
-
-### Bit Block Transfer
-**Assembly**:  
-```
-BLIT <OP> <DEST MASK>
-```
-
-2 addressing modes = 2 total instructions.
-
-**Bit Organization**:  
-
-Register direct:  
-
-| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
-| --------- | ---- | --------- | ----------- | ------------- | -------- |
-| 5         | 2    | 2         | 5           | 5             | 13       |
-
-Immediate:  
-
-| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
-| --------- | ---- | --------- | ----------- | ------------- | -------- |
-| 5         | 2    | 2         | 4           | 8             | 11       |
-
-**Behavior**:  
-
-Executes a bit block transfer operation using the Blitter.  
-
-The Blitter operation which takes place is specified by the `<BLIT OP>` 
-operand. See the [Blitter Operations section](#blitter-operations) for valid 
-operation codes.
-
-The `<DEST MASK>` is an 8-bit and-style-mask which will be applied to the bits
-of each pixel after it has been run through the Blitter operation and before it 
-is copied to the destination.
-
-**Operands**:  
-
-- `<BLIT OP>`: 4-bit immediate value or first 4 least significant bits of a
-  register determining which Blitter operation to perform, see 
-  [Blitter Operations section](#blitter-operations)
-- `<DEST MASK>`: 8-bit immediate value or first 8 least significant bits of a
-  register which will be used as an and-style-mask on pixels
+This can be used when there are data dependencies in the assembly code, and need to introduce bubbles in the pipeline.
