@@ -50,6 +50,28 @@ does not occur again.
 
 # What We Learned
 
+## Noah 
+
+When designing the simulator's systems and how they would interact with each other I 
+learned the value of defining clear system boundaries. This made it easy for me
+to complete small defined tasks when I had the time and design / implement the
+ISA specification, memory, caches, pipeline, control unit, and GUI. While 
+making it easier for my partner
+to implement the instructions and assembler to meet a specification. 
+Which when compliant with the specification easily integrated with the 
+other systems.
+
+The process of designing and implementing the simulator helped me understand the nuances of the different system and
+how small design decisions can have a large impact on the overall outcome. For
+example how the decision to fetch multiple words into the cache from DRAM is
+required in order to achieve spacial locality, which can play a large role 
+in performance.
+
+Implementing the simulator gave me a chance to improve some areas of my 
+programming toolbox. I was able to learn a new programming language, Rust,
+try out a new technology, Web Assembly, as well as learn how to create user
+interfaces with React Js. 
+
 ## Rob
 
 I learned a tremendous amount after completing this project, and I feel like I now have a solid understanding of how programs gets ran on a processor.  We get taught most of this material from CS 335, like pipelines, memory, and assemblers, but after completing this project I now feel that I have solidified that knowledge.  
@@ -64,96 +86,189 @@ I have also learned a lot more about git than I knew before.  I learned how to p
 
 This project has given me loads of respect for the engineers behind todays processors and ISAs.  I had no idea the complexity of work that goes into making something like this, and this is only a simulator.
 
-## Noah 
+# How The Simulator Works
 
+The graphical user interface is automatically built and deployed to
+[l-e-g.github.io/simulator](https://l-e-g.github.io/simulator/) via a 
+continuous integration pipeline.
 
+All the simulator code is written in Rust and the graphical user interface is
+written in JavaScript.
 
-# How the Simulator works
+The simulator code is compiled to Web Assembly, which can be run directly in the
+browser, and invoked by the JavaScript GUI.
 
-The simulator is set up in 5 different sections, each of which I will link to their respective sections below:
- - [Memory](#memory)
- - [Instructions](#instructions)
- - [GUI](#gui)
- - [Pipeline](#pipeline)
- - [Assembler](#assembler)
+In the browser Web Assembly has its own execution environment and memory space.
+To connect the Web Assembly compiled simulator and JavaScript GUI a cross domain
+interface is defined. The simulator's internal state is kept in the Web Assembly
+memory space and only data which needs to be directly displayed by the GUI is
+shipped over to the JavaScript domain. This allows us to achieve some measure of
+performance.
 
-The pipeline is what controls the program.  This is where all the instances of each component lives, and where they are called.
+The simulator has 6 distinct systems:
 
-As assembly file are loaded into the gui, the contents of this file are passed back to the pipeline, where they are ran through the assembler, and then loaded into memory.  Then each time we step in the pipeline, an instruction will be pulled from memory and entered into the first stage of the pipeline.  This continues until the [HALT](#halt) instruction is reached, at which point the pipeline will wrap up, and empty.
+**JavaScript Land**  
 
-## GUI
+- [GUI](#simulator-gui)
 
-Our user interface utilizes a library called WASM to interact between the gui and the rust code.  WASM is different in that this compiles all the rust code into web assembly, so that our code can be accessed from a front end service.  
+**JavaScript & Web Assembly / Rust Land**  
 
-We chose to write our front end in React, making our user interface look sleek and modern.  Because we used React, we had the ability to customize our user interface with ease and produce a professional looking interface.
+- [Cross Domain Interface](#simulator-cross-domain-interface)
 
-In the interface, we are able to upload assembly files, run example programs, watch the pipeline, watch the registers, watch the cache, and watch the DRAM.
+**Web Assembly / Rust Land**  
 
-## Pipeline
+- [Assembler](#simulator-assembler)
+- [Control Unit](#simulator-control-unit)
+- [Memory](#simulator-memory)
+- [Instructions](#simulator-instructions)
 
-The pipeline includes 5 stages:
-- [Fetch](#fetch)
-- [Decode](#decode)
-- [Execute](#execute)
-- [Memory Access](#memoryaccess)
-- [Write Back](writeback)
+## Simulator GUI
 
-### Fetch
+The user interface is written in JavaScript using 
+[React JS](https://reactjs.org/) which allowed us to easily display data values.
 
-This stage gets the next instruction in the memory specified by the value of `PC`.
+It uses the cross domain interface to start the simulation execution in the 
+Web Assembly domain and get data it needs to display to the user out of the Web 
+Assembly memory space.
 
-### Decode 
+## Simulator Cross Domain Interface
 
-This stage will unpack the instruction type bits and the operation code bits of the instruction, determine which instruction this is based on the bits, and create an instance of the instruction to be executed.
+Rust has native support for a Web Assembly compilation target. There also exists
+a library ([`wasm_bindgen`](https://rustwasm.github.io/docs/wasm-bindgen/)) 
+which defines a standard data serialization format and function call interface
+that Rust and JavaScript can use to interface with each other.
 
-Once an instance is created the data will be pulled from the instruction and stored for later use.
+In this interface we initialize all the other Rust simulator systems and provide
+hooks for the GUI to use these systems. 
 
-### Execute
+## Simulator Assembler
 
-This stage will perform whatever operation the instruction calls for.  This is where the actual computing happens.  This stage is mostly used for ALU, Logic and Shift instructions since those instructions do most of the computing.
+The assembler is a standard 2 pass assembler with support for labels. During the
+first pass we parse instructions and figure out what data we need to pack into
+bits. On the second pass we resolve the location of labels, allowing for 
+instruction like jump which use these label values.
 
-### Memory Access
+It can either be executed via the command line. Or the GUI can invoke the 
+assembler on user input.
 
-If the instruction need to access memory, the instruction will do so in this stage.
+## Simulator Control Unit
 
-### Write back
+The control unit simulates what a control unit would do in hardware. It has 
+access to interfaces for the memory system, an understanding of how to decode
+all the ISA instructions, and the ability to execute these instructions through
+a pipeline.
 
-This stage will write back any values that were computed or found during the course of the instruction to a specified register.  It is this reason why there are holes in some pipelines as they're being computed.  If a later instruction is waiting for a value to be written back to a register, then that instruction will have to wait until this instruction reached this phase.
+The pipeline is a 5 stage pipeline:
 
-## Assembler
+- **Fetch:** Retrieve next instruction's bits from memory
+- **Decode:** Interpret instruction operands and retrieve any register values
+- **Execute:** Run core instruction logic, typically an ALU operation
+- **Memory Access:** Access memory
+- **Write Back:** Write results back to registers
 
-This assembler works in two passes.  The first pass gathers the values needed to appropriately pack the bits, and the second pass packs the bits based on this gathered information.
+Every operation which takes place in the pipeline returns the number of cycles
+it took to complete. These values are accumulated and added to the total control
+unit cycle count. This allows us to more efficiently simulate clock delays.
 
-By performing two passes of the assembly instructions, we are able to point out where the labels are positioned so that we can accurately fill in the right value in the `JMP` instructions.
+Due to a constraint on the number of man hours available when implementing the 
+pipeline data dependencies are not handled automatically. This is a feature we
+would have liked to have in the pipeline but could not implement it.
+
+## Simulator Memory
+
+The simulator has 4 layers of memory:
+
+- L1 Cache: 16 lines, 1 word each, 1 cycle delay
+- L2 Cache: 32 lines, 1 word each, 10 cycle delay
+- L3 Cache: 512 lines, 1 word each, 40 cycle delay
+- DRAM: $2^{32}$ address space, 100 cycle delay
+
+All memory layers implement a standard memory interface with a get and set 
+method, which among other things return the number of cycles they took. This 
+allowed us to easily change our memory hierarchy whenever we wanted since 
+every layer is used the exact same way.
+
+Our caches read from the layer beneath them if there was a miss, and evicted 
+data to the layer beneath them if there was a conflict. Unfortunately our caches
+do not provide much spacial locality because each layer only fetches the word 
+requested and no additional words. This was a result of us running out of time
+and failing to implement this feature.
+
+The caches are represented as contiguous blocks of memory which are directly
+indexed into using a portion of the memory address.
+
+The DRAM is represented as a hash map. Although this achieves slightly worse
+performance it allows us to simulate access to the entirety of our address 
+space. Since most simulated programs are short we determined the access time 
+penalty of a hash map was negligible.
+
+## Simulator Instructions
+
+All instructions implement a standard instruction interface which has a method
+to be run during each stage of the pipeline. Stages which need access to 
+registers or memory are given access via method arguments.
+
+This allowed us to easily write the pipeline since every instruction could be
+treated the same.
 
 # How to use Simulator
 
-The simulator can be accessed at this link: http://l-e-g.github.io/simulator
+The simulator can be accessed at 
+[l-e-g.github.io/simulator](https://l-e-g.github.io/simulator/). 
 
-Since we use the WASM library and are able to compile our code into web assembly, and use a front end for our GUI; we chose to use React.  Because of this, we can deploy our GUI so that everyone can use it whenever they want.  
+Using Web Assembly and React Js for our frontend allows us to not only easily 
+create a user interface but also make it accessible to anyone with a 
+web browser.
 
-Once on our website, you can begin using our simulator by writing your own assembly code into the text box, or copying and pasting assembly code in.  If you don't want to use assembly code and want to use binary instructions, then you can hit the button "Select File" and a file explorer will pop up and you can select a binary file.
+Once on our website, you can begin using our simulator by writing your own 
+assembly code into the text box, or copying and pasting assembly code in.  If 
+you don't want to use assembly code and want to use binary instructions, then 
+you can hit the button "Select File" and a file explorer will pop up and you can
+select a binary file.
 
-To start the program, there are two options: First is to use the "Step" button, which will walk through the program one instruction at a time.  The other option is to use the "Run" button which will execute the entire program at once.
+To start the program, there are two options: First is to use the "Step" button,
+which will walk through the program one instruction at a time.  The other option
+is to use the "Run" button which will execute the entire program at once.
 
-When using the "Step" button, the pipeline will begin to fill up with your instructions, and you can watch them flow down the pipeline.  At the top the cycle count will grow as the program advances, and the `PC` value will change as the program steps.  If your program includes jumps, you can watch the `PC` value change as it jumps around the instructions in memory.
+When your program executes the pipeline will begin to fill up with your
+instructions, and you can watch them flow down the pipeline.  At the top the 
+cycle count will grow as the program advances, and the `PC` value will change as
+the program steps. If your program includes jumps, you can watch the `PC` value
+change as it jumps around the instructions in memory.
 
-There are a few options that can be set before executing the program: to run with or without cache, and to run with or without the pipeline.  When cache is set, the program will utilize the 3 layers of cache to store data.  When the cache is not set the program will use all DRAM to store data.  When the pipeline is set the program will execute all instructions through the pipeline.  When the pipeline is not set the program will execute all stages of the instruction at once.  
+There are a few options that can be set before executing the program: to run 
+with or without cache, and to run with or without the pipeline. When cache is 
+set, the program will utilize the 3 layers of cache to store data. When the 
+cache is not set the program will use all DRAM to store data. When the pipeline 
+is set the program will execute all instructions through the pipeline. When the
+pipeline is not set the program will execute all stages of the instruction 
+at once.
 
-# Perfomrance results
+# Performance Results
 
-The following results are ran off of our Matrix Multiply program that has 63 lines of assembly code.
+The following results are from our Matrix Multiply program that has 63 
+lines of assembly code.
 
-| Mode                  | Cycle Count |
-| --------------------- | ----------- |
-| No Pipeline, No Cache | 6615        |
-| Pipeline, No Cache    | 6367        |
-| No Pipeline, Cache    | 9828        |
-| Pipeline, Cache       | 9580        |
+| Pipeline? | Cache?   | Clock Cycle Count |
+| --------- | ------   | ----------------- |
+| Enabled   | Enabled  | 9580              |
+| Enabled   | Disabled | 6367              |
+| Disabled  | Enabled  | 9828              |
+| Disabled  | Disabled | 6615              |
 
-As we can see here, running our simulator without a cache will improve our cycle count since we do not have to take the extra time to access the cache as well as access the DRAM.  However if we don't use the cache and don't use the pipeline, then out cycle count goes up because it takes longer to run every instruction linearly.
+As we can see, running the simulator without the cache is the fastest. This 
+results from the fact that our benchmark did all calculations in registers and
+only access memory for instructions. This was a flaw in our benchmark which we
+did not have time to resolve. To further compound this problem our caches do not
+provide spacial locality, so loading instructions through them will always incur
+an additional access time penalty. 
 
-Similarly, if we run our simulator without a pipeline then we see a larger cycle count since we have to run our instructions linearly.  Interestingly enough though, it appears that when we run the simulator without a pipeline and without a cache, it runs faster than if we ran it with both.  That must mean that it costs more to add in cache than it does to add in a pipeline because the cache needs to warm up, and doesn't get to properly do that in time, meaning that the cache experiences many misses at first. 
+We can see that running the simulator with the pipeline is faster then without
+the pipeline. This is an encouraging sign, showing that the pipeline does 
+provide performance increases as it is supposed to.
+
+However due to the limitations discussed above with our cache, running with 
+pipeline and no cache is the fastest.
 
 # Memory
 **Endianess**: Little  
@@ -169,9 +284,9 @@ store instructions.
 
 **Memory Hierarchy**:  
 
-1. Level 1, SRAM: 64 KB, 4-way associative (1 cycle delay)
-2. Level 2, SRAM: 256 KB, direct mapped (10 cycle delay)
-3. Level 3, SRAM: 8 MB, direct mapped (40 cycle delay)
+1. Level 1, SRAM: direct mapped, 1 cycle delay
+2. Level 2, SRAM: direct mapped, 10 cycle delay
+3. Level 3, SRAM: direct mapped, 40 cycle delay
 4. DRAM: $2^{32} \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
 
 # Registers
