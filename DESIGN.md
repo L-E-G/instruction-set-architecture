@@ -919,7 +919,7 @@ will be interpreted as a halt instruction:
 <CONDITION>JMP{SPECIAL} <ADDR>
 ```
 
-2 addressing modes + 2 types + 1 special interrupt = 5 total instructions.
+2 addressing modes + 2 types = 4 total instructions.
 
 **Bit Organization**:
 
@@ -947,19 +947,10 @@ modified behavior jump:
 | `{SPECIAL}` | Behavior                   |
 | ----------- | --------                   |
 | `S`         | Subroutine jump            |
-| `I`         | Return from interrupt jump |
 | `(Empty) `  | Normal jump                |
 
 A subroutine jump sets the link register to the program counter register 
 plus one. Then it performs a normal jump.
-
-A return from interrupt jump performs the following actions:
-
-- Checks if the interrupt flag is set in the status register, if not exits 
-  the instruction
-- Sets the interrupt flag in the set status register to false
-- Sets the program counter to the value in the interrupt link register
-- Then performs a normal jump to the value stored in the interrupt link register
 
 A normal jump sets the program counter register to the value specified by the
 `<ADDR>` operand.
