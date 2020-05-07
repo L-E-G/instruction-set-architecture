@@ -52,32 +52,42 @@ does not occur again.
 
 ## Rob
 
-I learned a tremendous amount after completing this project, and I feel like I now have a solid understanding of how code gets ran on a processor.  We get taught most of this material from CS 335, like pipelines, memory, and assemblers, but after completing this project I now feel that I have solidified that knowledge.  
+I learned a tremendous amount after completing this project, and I feel like I now have a solid understanding of how programs gets ran on a processor.  We get taught most of this material from CS 335, like pipelines, memory, and assemblers, but after completing this project I now feel that I have solidified that knowledge.  
 
-In the pipeline, for example, I remember going through the slides that covered the pipeline in 335 so that I could study for the test, and I thought I knew what I knew how it worked.  But what I failed to understand is the little things that help make the pipeline work.  Like how the interactions get loaded into memory, and the program counter keep track of which instruction to fetch.  And when we preform a jump all we're doing is changing the program counter to the address of the instruction we want to start from.  
+In the pipeline, for example, I remember going through the slides that covered the pipeline in 335 so that I could study for the test, and I thought I knew how it worked.  But what I failed to understand is the little things that help make the pipeline work.  Like how the interactions get loaded into memory, and the program counter keep track of which instruction to fetch.  And when we preform a jump all we're doing is changing the program counter to the address of the instruction we want to start from.  
 
 Another example is with the assembler.  I remember learning that it loops through the instruction twice, but I never understood why.  Now that I have implemented an assembler, it makes total sense why we do that.  Not only does it makes the work easier since all I need to do it grab the info that I need, but also we can learn the locations of the labels so that we can insert the positions of those into the jumps.  After creating the assembler, this all makes sense.
 
+I have also learned a tremendous amount in the programming language rust as well.  Prior to this project I did not know rust, and now I feel confident that I can program anything in rust, and utilize it's unique (and annoying) functions of safe memory borrowing.  I feel confident to add this to my resume.
+
+I have also learned a lot more about git than I knew before.  I learned how to properly merge branches, properly deal with merge conflicts, and manage a pull request.  I think these will be valuable skills to have when entering the workforce.
+
 This project has given me loads of respect for the engineers behind todays processors and ISAs.  I had no idea the complexity of work that goes into making something like this, and this is only a simulator.
+
+## Noah 
+
+
 
 # How the Simulator works
 
-The simulator is set up in 5 different sections, each of which I will link to their respective sections below is applicable:
+The simulator is set up in 5 different sections, each of which I will link to their respective sections below:
  - [Memory](#memory)
  - [Instructions](#instructions)
  - [GUI](#gui)
  - [Pipeline](#pipeline)
  - [Assembler](#assembler)
 
-The pipeline is what control the program.  This is where all the instances of each of the sections lives, and where they are called.
+The pipeline is what controls the program.  This is where all the instances of each component lives, and where they are called.
 
-As assembly file will be loaded into the gui, and the contents of this file are passed back to the pipeline, where they are ran through the assembler, and then loaded into memory.  Then each time we step in the pipeline, an instruction will be pulled from memory and entered into the first stage of the pipeline.  This continues until the [HALT](#halt) instruction is reached, at which point the pipeline will wrap up, and empty.
+As assembly file are loaded into the gui, the contents of this file are passed back to the pipeline, where they are ran through the assembler, and then loaded into memory.  Then each time we step in the pipeline, an instruction will be pulled from memory and entered into the first stage of the pipeline.  This continues until the [HALT](#halt) instruction is reached, at which point the pipeline will wrap up, and empty.
 
 ## GUI
 
-Our user interface utilizes a library called WASM to interact between the gui and the rust code.  WASM is different in that this actually compiles all the rust code into web assembly, so that our code can be accessed from a front end service.  
+Our user interface utilizes a library called WASM to interact between the gui and the rust code.  WASM is different in that this compiles all the rust code into web assembly, so that our code can be accessed from a front end service.  
 
 We chose to write our front end in React, making our user interface look sleek and modern.  Because we used React, we had the ability to customize our user interface with ease and produce a professional looking interface.
+
+In the interface, we are able to upload assembly files, run example programs, watch the pipeline, watch the registers, watch the cache, and watch the DRAM.
 
 ## Pipeline
 
@@ -94,11 +104,11 @@ This stage gets the next instruction in the memory specified by the value of `PC
 
 ### Decode 
 
-This stage will unpack the instruction type bits and the operation code bits of the instruction, and create an instance of the instruction to be executed.
+This stage will unpack the instruction type bits and the operation code bits of the instruction, determine which instruction this is based on the bits, and create an instance of the instruction to be executed.
 
 ### Execute
 
-This stage will perform whatever operation that the instruction calls for.
+This stage will perform whatever operation the instruction calls for.  This is where the actual computing happens
 
 ### Memory Access
 
