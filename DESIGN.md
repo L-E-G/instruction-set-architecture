@@ -144,12 +144,16 @@ There are a few options that can be set before executing the program: to run wit
 
 The following results are ran off of our Matrix Multiply program that has 63 lines of assembly code.
 
-| Mode                            | Cycle Count |
-| ------------------------------- | ----------- |
-| No Pipeline, No Cache           | 0         |
-| Pipeline, No Cache              | 0         |
-| No Pipeline, Cache              | 0         |
-| Pipeline, Cache                 | 0         |
+| Mode                  | Cycle Count |
+| --------------------- | ----------- |
+| No Pipeline, No Cache | 6615        |
+| Pipeline, No Cache    | 6367        |
+| No Pipeline, Cache    | 7245        |
+| Pipeline, Cache       | 6997        |
+
+As we can see here, running our simulator without a cache will improve our cycle count since we do not have to take the extra time to access the cache as well as access the DRAM.  However if we don't use the cache and don't use the pipeline, then out cycle count goes up because it takes longer to run every instruction linearly.
+
+Similarly, if we run our simulator without a pipeline then then we see a larger cycle count since we have to run our instructions linearly.  Interestingly enough though, it appears that when we run the simulator without a pipeline and without a cache, it runs faster than if we ran it with both.  That must mean that it costs more to add in cache than it does to add in a pipeline. 
 
 # Memory
 **Endianess**: Little  
