@@ -48,14 +48,231 @@ correctness of the new features.
 If bugs are fixed regression tests must be added to ensure the bug is fixed and 
 does not occur again.
 
+# What We Learned
+
+## Noah 
+
+When designing the simulator's systems and how they would interact with each other I 
+learned the value of defining clear system boundaries. This made it easy for me
+to complete small defined tasks when I had the time and design / implement the
+ISA specification, memory, caches, pipeline, control unit, and GUI. While 
+making it easier for my partner
+to implement the instructions and assembler to meet a specification. 
+Which when compliant with the specification easily integrated with the 
+other systems.
+
+The process of designing and implementing the simulator helped me understand the nuances of the different system and
+how small design decisions can have a large impact on the overall outcome. For
+example how the decision to fetch multiple words into the cache from DRAM is
+required in order to achieve spacial locality, which can play a large role 
+in performance.
+
+Implementing the simulator gave me a chance to improve some areas of my 
+programming toolbox. I was able to learn a new programming language, Rust,
+try out a new technology, Web Assembly, as well as learn how to create user
+interfaces with React Js. 
+
+## Rob
+
+I learned a tremendous amount after completing this project, and I feel like I now have a solid understanding of how programs gets ran on a processor.  We get taught most of this material from CS 335, like pipelines, memory, and assemblers, but after completing this project I now feel that I have solidified that knowledge.  
+
+In the pipeline, for example, I remember going through the slides that covered the pipeline in 335 so that I could study for the test, and I thought I knew how it worked.  But what I failed to understand is the little things that help make the pipeline work.  Like how the interactions get loaded into memory, and the program counter keep track of which instruction to fetch.  And when we preform a jump all we're doing is changing the program counter to the address of the instruction we want to start from.  
+
+Another example is with the assembler.  I remember learning that it loops through the instruction twice, but I never understood why.  Now that I have implemented an assembler, it makes total sense why we do that.  Not only does it makes the work easier since all I need to do it grab the info that I need, but also we can learn the locations of the labels so that we can insert the positions of those into the jumps.  After creating the assembler, this all makes sense.
+
+I have also learned a tremendous amount in the programming language rust as well.  Prior to this project I did not know rust, and now I feel confident that I can program anything in rust, and utilize it's unique (and annoying) functions of safe memory borrowing.  I feel confident to add this to my resume.
+
+I have also learned a lot more about git than I knew before.  I learned how to properly merge branches, properly deal with merge conflicts, and manage a pull request.  I think these will be valuable skills to have when entering the workforce.
+
+This project has given me loads of respect for the engineers behind todays processors and ISAs.  I had no idea the complexity of work that goes into making something like this, and this is only a simulator.
+
+# How The Simulator Works
+
+The graphical user interface is automatically built and deployed to
+[l-e-g.github.io/simulator](https://l-e-g.github.io/simulator/) via a 
+continuous integration pipeline.
+
+All the simulator code is written in Rust and the graphical user interface is
+written in JavaScript.
+
+The simulator code is compiled to Web Assembly, which can be run directly in the
+browser, and invoked by the JavaScript GUI.
+
+In the browser Web Assembly has its own execution environment and memory space.
+To connect the Web Assembly compiled simulator and JavaScript GUI a cross domain
+interface is defined. The simulator's internal state is kept in the Web Assembly
+memory space and only data which needs to be directly displayed by the GUI is
+shipped over to the JavaScript domain. This allows us to achieve some measure of
+performance.
+
+The simulator has 6 distinct systems:
+
+**JavaScript Land**  
+
+- [GUI](#simulator-gui)
+
+**JavaScript & Web Assembly / Rust Land**  
+
+- [Cross Domain Interface](#simulator-cross-domain-interface)
+
+**Web Assembly / Rust Land**  
+
+- [Assembler](#simulator-assembler)
+- [Control Unit](#simulator-control-unit)
+- [Memory](#simulator-memory)
+- [Instructions](#simulator-instructions)
+
+## Simulator GUI
+
+The user interface is written in JavaScript using 
+[React JS](https://reactjs.org/) which allowed us to easily display data values.
+
+It uses the cross domain interface to start the simulation execution in the 
+Web Assembly domain and get data it needs to display to the user out of the Web 
+Assembly memory space.
+
+## Simulator Cross Domain Interface
+
+Rust has native support for a Web Assembly compilation target. There also exists
+a library ([`wasm_bindgen`](https://rustwasm.github.io/docs/wasm-bindgen/)) 
+which defines a standard data serialization format and function call interface
+that Rust and JavaScript can use to interface with each other.
+
+In this interface we initialize all the other Rust simulator systems and provide
+hooks for the GUI to use these systems. 
+
+## Simulator Assembler
+
+The assembler is a standard 2 pass assembler with support for labels. During the
+first pass we parse instructions and figure out what data we need to pack into
+bits. On the second pass we resolve the location of labels, allowing for 
+instruction like jump which use these label values.
+
+It can either be executed via the command line. Or the GUI can invoke the 
+assembler on user input.
+
+## Simulator Control Unit
+
+The control unit simulates what a control unit would do in hardware. It has 
+access to interfaces for the memory system, an understanding of how to decode
+all the ISA instructions, and the ability to execute these instructions through
+a pipeline.
+
+The pipeline is a 5 stage pipeline:
+
+- **Fetch:** Retrieve next instruction's bits from memory
+- **Decode:** Interpret instruction operands and retrieve any register values
+- **Execute:** Run core instruction logic, typically an ALU operation
+- **Memory Access:** Access memory
+- **Write Back:** Write results back to registers
+
+Every operation which takes place in the pipeline returns the number of cycles
+it took to complete. These values are accumulated and added to the total control
+unit cycle count. This allows us to more efficiently simulate clock delays.
+
+Due to a constraint on the number of man hours available when implementing the 
+pipeline data dependencies are not handled automatically. This is a feature we
+would have liked to have in the pipeline but could not implement it.
+
+## Simulator Memory
+
+The simulator has 4 layers of memory:
+
+- L1 Cache: 16 lines, 1 word each, 1 cycle delay
+- L2 Cache: 32 lines, 1 word each, 10 cycle delay
+- L3 Cache: 512 lines, 1 word each, 40 cycle delay
+- DRAM: $2^{32}$ address space, 100 cycle delay
+
+All memory layers implement a standard memory interface with a get and set 
+method, which among other things return the number of cycles they took. This 
+allowed us to easily change our memory hierarchy whenever we wanted since 
+every layer is used the exact same way.
+
+Our caches read from the layer beneath them if there was a miss, and evicted 
+data to the layer beneath them if there was a conflict. Unfortunately our caches
+do not provide much spacial locality because each layer only fetches the word 
+requested and no additional words. This was a result of us running out of time
+and failing to implement this feature.
+
+The caches are represented as contiguous blocks of memory which are directly
+indexed into using a portion of the memory address.
+
+The DRAM is represented as a hash map. Although this achieves slightly worse
+performance it allows us to simulate access to the entirety of our address 
+space. Since most simulated programs are short we determined the access time 
+penalty of a hash map was negligible.
+
+## Simulator Instructions
+
+All instructions implement a standard instruction interface which has a method
+to be run during each stage of the pipeline. Stages which need access to 
+registers or memory are given access via method arguments.
+
+This allowed us to easily write the pipeline since every instruction could be
+treated the same.
+
+# How to use Simulator
+
+The simulator can be accessed at 
+[l-e-g.github.io/simulator](https://l-e-g.github.io/simulator/). 
+
+Using Web Assembly and React Js for our frontend allows us to not only easily 
+create a user interface but also make it accessible to anyone with a 
+web browser.
+
+Once on our website, you can begin using our simulator by writing your own 
+assembly code into the text box, or copying and pasting assembly code in.  If 
+you don't want to use assembly code and want to use binary instructions, then 
+you can hit the button "Select File" and a file explorer will pop up and you can
+select a binary file.
+
+To start the program, there are two options: First is to use the "Step" button,
+which will walk through the program one instruction at a time.  The other option
+is to use the "Run" button which will execute the entire program at once.
+
+When your program executes the pipeline will begin to fill up with your
+instructions, and you can watch them flow down the pipeline.  At the top the 
+cycle count will grow as the program advances, and the `PC` value will change as
+the program steps. If your program includes jumps, you can watch the `PC` value
+change as it jumps around the instructions in memory.
+
+There are a few options that can be set before executing the program: to run 
+with or without cache, and to run with or without the pipeline. When cache is 
+set, the program will utilize the 3 layers of cache to store data. When the 
+cache is not set the program will use all DRAM to store data. When the pipeline 
+is set the program will execute all instructions through the pipeline. When the
+pipeline is not set the program will execute all stages of the instruction 
+at once.
+
+# Performance Results
+
+The following results are from our Matrix Multiply program that has 63 
+lines of assembly code.
+
+| Pipeline? | Cache?   | Clock Cycle Count |
+| --------- | ------   | ----------------- |
+| Enabled   | Enabled  | 9580              |
+| Enabled   | Disabled | 6367              |
+| Disabled  | Enabled  | 9828              |
+| Disabled  | Disabled | 6615              |
+
+As we can see, running the simulator without the cache is the fastest. This 
+results from the fact that our benchmark did all calculations in registers and
+only access memory for instructions. This was a flaw in our benchmark which we
+did not have time to resolve. To further compound this problem our caches do not
+provide spacial locality, so loading instructions through them will always incur
+an additional access time penalty. 
+
+We can see that running the simulator with the pipeline is faster then without
+the pipeline. This is an encouraging sign, showing that the pipeline does 
+provide performance increases as it is supposed to.
+
+However due to the limitations discussed above with our cache, running with 
+pipeline and no cache is the fastest.
+
 # Memory
 **Endianess**: Little  
-**Memory Organization**: Harvard
-
-Memory is broken in to 2 parts:
-
-- Data and instructions
-- Graphics
+**Memory Organization**: Princeton
 
 ## Data and Instruction Memory
 **Word Size**: 32 bits  
@@ -67,106 +284,10 @@ store instructions.
 
 **Memory Hierarchy**:  
 
-1. Level 1, SRAM: 64 KB, 4-way associative (1 cycle delay)
-2. Level 2, SRAM: 256 KB, direct mapped (10 cycle delay)
-3. Level 3, SRAM: 8 MB, direct mapped (40 cycle delay)
+1. Level 1, SRAM: direct mapped, 1 cycle delay
+2. Level 2, SRAM: direct mapped, 10 cycle delay
+3. Level 3, SRAM: direct mapped, 40 cycle delay
 4. DRAM: $2^{32} \cdot 32 \text{bits} \simeq 17 \text{GB}$ (100 cycle delay)
-
-## Graphics Memory
-The graphics memory is composed of SRAM.
-
-There are two main pieces of graphics memory which are interacted with 
-exclusively through custom instructions:
-
-- Frame buffer
-- Sprite library
-
-All graphics memory shares these underlying properties:  
-
-**Word Size**: 8 bits  
-**Addressing Unit**: Word
-
-Pixel organization in memory:
-
-8 bit pixels: 3 red, 3 green, 2 blue.  
-
-The first pixel defines the top left pixel in a display, the last pixel the 
-bottom right pixel in a display.  
-
-The width of the thing being displayed determines how many bytes there are
-per line. 
-
-### Frame Buffer
-**Address Space**: $2^{16}$  
-
-Holds pixels to be displayed to the user on a screen.  
-Screen size is 256 x 256 pixels.  
-
-Can only be manipulated by graphics instructions.
-
-**Memory Hierarchy**:
-
-1. SRAM: 64 KB (4 cycle delay)
-
-### Sprite Library
-A piece of memory designed to hold sprites so they can be operated on in a 
-quick fashion.
-
-**Address Space**: $2^{12}$  
-
-This memory can hold up to 1 128x64 or 64x128 sprite, or several 
-smaller sprites. 
-
-**Memory Hierarchy**:
-
-1. SRAM: 8 KB (11 cycle delay)
-
-# Sprite Processing Unit (Blitter)
-The architecture includes a specialized sprite processing unit.
-
-This unit is inspired by the [Atari ST BLITTER chip](http://www.atari-wiki.com/index.php/Blitter_manual).  
-
-Its purpose is to quickly transfer bits from the sprite library memory to the 
-frame buffer, while performing basic logic operations along the way.
-
-In the documentation this will be referred to as the "Blitter".
-
-## Blitter Registers
-The Blitter has 4 registers which it uses internally to determine how to 
-transfer data.  
-
-- Source: 12-bit address in sprite library memory marking the start of a sprite
-- Destination: 16-bit address in frame buffer memory to start copying sprite to
-- Width: 7-bit width of sprite
-- Height: 7-bit width of sprite
-
-These registers cannot be read by any component other than the Blitter.  
-They can only be set via graphics instructions.
-
-## Blitter Operations
-The Blitter can perform many different logical operations on the source against
-the destination and store the result:
-
-| Binary | Operation      |
-| ------ | -------------- |
-| `0000` | All zeros      |
-| `0001` | `SRC & DEST`   |
-| `0010` | `SRC & ~DEST`  |
-| `0011` | `SRC`          |
-| `0100` | `~SRC & DEST`  |
-| `0101` | `DEST`         |
-| `0110` | `SRC ^ DEST`   |
-| `0111` | `SRC | DEST`   |
-| `1000` | `~SRC & ~DEST` |
-| `1001` | `~SRC ^ DEST`  |
-| `1010` | `~DEST`        |
-| `1011` | `SRC | ~DEST`  |
-| `1100` | `~SRC`         |
-| `1101` | `~SRC | DEST`  |
-| `1110` | `~SRC | ~DEST` |
-| `1111` | All ones       |
-
-(These are the same operations the Atari Blitter supported)
 
 # Registers
 Referred to in assembly as `R#` where `#` is a number.  
@@ -178,24 +299,6 @@ Some registers have aliases.
 `R0` through `R25`.
 
 Initially all set to 0.
-
-## Interrupt Link Register
-32-bit register.  
-
-`R26`, `INTLR`.  
-
-Store the address to return to after an interrupt has completed.  
-Initially set to 0.
-
-## Interrupt Handler
-32-bit register.  
-
-`R27` or `IHDLR`.  
-
-Stores the memory address of the interrupt handler subroutine.  
-Initially set to all 1's to indicate it has not been set.  
-
-See the [Interrupts section](#interrupts) for details.
 
 ## Program Counter
 32-bit register.  
@@ -258,49 +361,6 @@ Valid codes are:
 | `01010` | `NZ`     | Not zero                        |
 | `01011` | `NEG`    | Negative                        |
 | `01100` | `POS`    | Positive                        |
-
-## Interrupt Flag
-The interrupt flag signifies if an interrupt is currently being handled.  
-A value of `0` means no interrupts are being handled and vise versa.
-
-If the interrupt flag is set no new interrupts can be handled. Any new 
-interrupts which come in will be ignored.
-
-# Interrupts
-The interrupt handler register holds the memory address for a subroutine which 
-will handle an interrupt. Initially this register is set to all 1's, which means
-the handler is unset. 
-
-The simulator will internally trigger interrupts by doing the following:
-
-- Check if the interrupt flag in the status register is set, if so 
-  do nothing
-- If the interrupt handler register is all 1's the interrupt handler is not set,
-  do nothing
-- Set the interrupt flag in the status register
-- Store the interrupt code in memory at address 
-  `1111 1111 1111 1111 1111 1111 1111 1111`
-- Set the interrupt link register to the program counter
-- Set the program counter to the value of the interrupt handler register
-
-After the interrupt handler is done it must call perform a return from interrupt
-[Jump](#jump)
-
-The interrupt code identifies the cause of the interrupt.  
-When an interrupt occurs it will be loaded into main memory at 
-address `1111 1111 1111 1111 1111 1111 1111 1111`.
-
-Interrupts codes can have the following values:
-
-| Binary | Assembly     | Meaning         |
-| ------ | --------     | -------         |
-| `0000` | `UPARROW`    | Up arrow key    |
-| `0001` | `DOWNARROW`  | Down arrow key  |
-| `0010` | `LEFTARROW`  | Left arrow key  |
-| `0011` | `RIGHTARROW` | Right arrow key |
-| `0100` | `ENTER`      | Enter key       |
-| `0101` | `ESCAPE`     | Escape key      |
-| `0110` | `SPACE`      | Space key       |
 
 # Binary Format
 Once programs are assembled they will be in the LEG binary format. 
@@ -441,15 +501,6 @@ Currently only the jump instructions use this condition field.
 All other instructions do not use this field at the moment, in the future they
 may. For right now the condition field will be set to null status.
 
-## Immediate Fields
-Most immediate fields, with the exception of those in graphics instruction, are 
-sign extended to 32-bits.  
-
-Graphics instructions do not extend their immediate fields because they deal 
-with multiple different address spaces. The size of these immediate fields has
-been carefully specified. See the [Graphics Memory section](#graphics-memory) 
-for more details.
-
 ## Instruction Types
 There are 3 instruction types:
 
@@ -543,7 +594,7 @@ The operation field of each ALU instruction has the following meaning:
 {OPERATION}{TYPE} <DEST> <OP1> <OP2>
 ```
 
-3 operations * 2 types * 2 addressing modes = 12 total instructions.
+5 operations * 2 types * 2 addressing modes = 20 total instructions.
 
 **Bit Organization**:
 
@@ -569,6 +620,7 @@ Performs a basic arithmetic operation, determine by `{OPERATION}`:
 | `SUB`         | `<OP1> - <OP2>` |
 | `MLT`         | `<OP1> * <OP2>` |
 | `DIV`         | `<OP1> / <OP2>` |
+| `MOD`         | `<OP1> % <OP2>` |
 
 The type of numbers used in the arithmetic operation is specified by 
 appending `{TYPE}`:
@@ -580,6 +632,8 @@ appending `{TYPE}`:
 
 `{TYPE}` defaults to unsigned integer mode.
 
+In the case that the MLT instruction yields a result that is larger than 32 bits, the result will be cut off, and only the first 32 least significant bits will be used.
+
 **Operands**:
 
 - `<DEST>`: Register to store result
@@ -589,7 +643,7 @@ appending `{TYPE}`:
 ### Move
 **Assembly**:
 ```
-MV <DEST> <SRC>
+MOV <DEST> <SRC>
 ```
 
 1 total instruction.
@@ -839,7 +893,7 @@ Reads a word of memory from the address specified by the `<ADDR>` register into
 the `<DEST>` register.
 
 If in the immediate form the address immediate is sign extended and added to the
-incremented program counter value.
+incremented program counter value: `PC + Immediate Value`.
 
 **Operands**:
 
@@ -875,7 +929,7 @@ Writes a word of data from the `<SRC>` register to the memory address specified
 by the `<ADDR>` register.
 
 If in the immediate form the address immediate is sign extended and added to the
-incremented program counter value.
+incremented program counter value: `PC + Immediate Value`.
 
 **Operands**:
 
@@ -945,7 +999,7 @@ The operation field of each memory instruction has the following meaning:
 | `2`      | Jump Immediate     |
 | `3`      | Jump Subroutine Reg. Dir.     |
 | `4`      | Jump Subroutine Imm.     |
-| `5`      | Jump Return From Interrupt     |
+| `5`      | No Op     |
 
 ### Halt
 **Assembly**:
@@ -971,7 +1025,7 @@ will be interpreted as a halt instruction:
 
 - Condition `00000` is the null status
 - Type `00` is the control type
-- Operation `0` is the halt instruction
+- Operation `000` is the halt instruction
 - The rest of the bits are unused
 
 ### Jump
@@ -980,7 +1034,7 @@ will be interpreted as a halt instruction:
 <CONDITION>JMP{SPECIAL} <ADDR>
 ```
 
-2 addressing modes + 2 types + 1 special interrupt = 5 total instructions.
+2 addressing modes + 2 types = 4 total instructions.
 
 **Bit Organization**:
 
@@ -1008,19 +1062,10 @@ modified behavior jump:
 | `{SPECIAL}` | Behavior                   |
 | ----------- | --------                   |
 | `S`         | Subroutine jump            |
-| `I`         | Return from interrupt jump |
 | `(Empty) `  | Normal jump                |
 
 A subroutine jump sets the link register to the program counter register 
 plus one. Then it performs a normal jump.
-
-A return from interrupt jump performs the following actions:
-
-- Checks if the interrupt flag is set in the status register, if not exits 
-  the instruction
-- Sets the interrupt flag in the set status register to false
-- Sets the program counter to the value in the interrupt link register
-- Then performs a normal jump to the value stored in the interrupt link register
 
 A normal jump sets the program counter register to the value specified by the
 `<ADDR>` operand.
@@ -1035,174 +1080,22 @@ the program counter and the program counter is set to the result.
 
 - `<ADDR>`: Register containing new program counter value or a 24-bit immediate
 
-## Graphics
-8 total instructions.
-
-- [Load Sprite](#load-sprite)
-- [Set Bit Block Transfer Memory](#set-bit-block-transfer-memory)
-- [Set Bit Block Transfer Dimensions](#set-bit-block-transfer-dimensions)
-- [Bit Block Transfer](#bit-block-transfer)
-
-**Bit Organization**:  
-
-The operation field of each graphics instruction has the following meaning:
-
-| Binary | Meaning                           |
-| ------ | -------                           |
-| `1`    | Load Sprite Register Direct      |
-| `2`    | Load Sprite Immediate      |
-| `3`    | Set Bit Block Transfer Memory     |
-| `4`    | Set Bit Block Transfer Dimensions Reg. Dir. |
-| `5`    | Set Bit Block Transfer Dimensions Imm. |
-| `6`    | Bit Block Transfer Reg. Dir.               |
-| `7`    | Bit Block Transfer Imm.               |
-
-
-### Load Sprite
-**Assembly**:  
+### No Op
+**Assembly**:
 ```
-GLOD <DEST> <SRC> <LEN>
+NOOP
 ```
 
-2 addressing modes = 2 total instructions.
+1 instruction.
 
-**Bit Organization**:  
+**Bit Organization**:
 
-Register direct:
+| Condition | Type | Operation | Not Used |
+| --------- | ---- | --------- | -------- |
+| 5         | 2    | 3         | 21       |
 
-| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Not Used |
-| --------- | ---- | --------- | -------- | ------- | ------- | -------- |
-| 5         | 2    | 2         | 5        | 5       | 5       | 20       |
+**Behavior**:
 
-Immediate:
+Special instruction that does not do anything in the program, and acts as a filler.  
 
-| Condition | Type | Operation | `<DEST>` | `<SRC>` | `<LEN>` | Not Used |
-| --------- | ---- | --------- | -------- | ------- | ------- | -------- |
-| 5         | 2    | 2         | 12       | 10      | 12      | 1        |
-
-**Behavior**:  
-
-Copies a sprite of length `<LEN>` bytes from `<SRC>` in main memory to 
-`<DEST>` in the sprite library memory.
-
-Both `<DEST>` and `<SRC>` are the start address of the sprite.  
-The memory region `SRC + CEILING(LEN / 4)` is copied from main memory 
-to the region `DEST + LEN` in sprite library memory.  
-
-It should be noted that `<DEST>` is an address in the sprite library memory's 
-8-bit word address space, and `<SRC>` is an address in the main memory's 32-bit 
-word address space.
-
-**Operands**:  
-
-- `<DEST>`: 12-bit immediate or first 12 least significant bits of a register 
-  indicating the address in the sprite library memory to start copying to
-- `<SRC>`: 10-bit signed integer added to the program counter or register 
-  holding the start address in main memory of the sprite
-- `<LEN>`: 12-bit immediate or first 12 least significant bits of a register
-  indicating the length of the sprite in bytes
-
-### Set Bit Block Transfer Memory
-**Assembly**:  
-```
-BLITMEM <SRC> <DEST>
-```
-
-1 addressing mode = 1 total instruction.
-
-**Bit Organization**:  
-
-| Condition | Type | Operation | `<SRC>` | `<DEST>` | Not Used |
-| --------- | ---- | --------- | ------- | -------- | -------- |
-| 5         | 2    | 2         | 5       | 5        | 13       |
-
-**Behavior**:  
-
-Sets the internal sprite library memory source address register of the Blitter
-to the first 12 bits contained in the `<SRC>` register. 
-
-Sets the frame buffer destination register of the Blitter to the first 16 bits 
-contained in the `<DEST>` register.
-
-**Operands**:  
-
-- `<SRC>`: Register who's first 12 least significant bits are an address to a
-  sprite's start in the sprite library memory.
-- `<DEST>`: Register who's first 16 least significant bits are an address to the
-  start location in the frame buffer.
-
-### Set Bit Block Transfer Dimensions
-**Assembly**:  
-```
-BLITDIMS <WIDTH> <HEIGHT>
-```
-
-2 addressing modes = 2 total instructions.
-
-**Bit Organization**:  
-
-Register direct:  
-
-| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
-| --------- | ---- | --------- | --------- | ---------- | -------- |
-| 5         | 2    | 2         | 5         | 5          | 13       |
-
-Immediate:  
-
-| Condition | Type | Operation | `<WIDTH>` | `<HEIGHT>` | Not Used |
-| --------- | ---- | --------- | --------- | ---------- | -------- |
-| 5         | 2    | 2         | 7         | 7          | 9        |
-
-**Behavior**:  
-
-Sets the internal width and height registers of the Blitter to the values 
-specified by the `<WIDTH>` and `<HEIGHT>` operands.
-
-**Operands**: 
-
-- `<WIDTH>`: 7-bit immediate value or register who's first 7 least significant
-  bits will be used as the Blitter's width value
-- `<HEIGHT>`: 7-bit immediate value or register who's first 7 least significant
-  bits will be used as the Blitter's height value
-
-### Bit Block Transfer
-**Assembly**:  
-```
-BLIT <OP> <DEST MASK>
-```
-
-2 addressing modes = 2 total instructions.
-
-**Bit Organization**:  
-
-Register direct:  
-
-| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
-| --------- | ---- | --------- | ----------- | ------------- | -------- |
-| 5         | 2    | 2         | 5           | 5             | 13       |
-
-Immediate:  
-
-| Condition | Type | Operation | `<BLIT OP>` | `<DEST MASK>` | Not Used |
-| --------- | ---- | --------- | ----------- | ------------- | -------- |
-| 5         | 2    | 2         | 4           | 8             | 11       |
-
-**Behavior**:  
-
-Executes a bit block transfer operation using the Blitter.  
-
-The Blitter operation which takes place is specified by the `<BLIT OP>` 
-operand. See the [Blitter Operations section](#blitter-operations) for valid 
-operation codes.
-
-The `<DEST MASK>` is an 8-bit and-style-mask which will be applied to the bits
-of each pixel after it has been run through the Blitter operation and before it 
-is copied to the destination.
-
-**Operands**:  
-
-- `<BLIT OP>`: 4-bit immediate value or first 4 least significant bits of a
-  register determining which Blitter operation to perform, see 
-  [Blitter Operations section](#blitter-operations)
-- `<DEST MASK>`: 8-bit immediate value or first 8 least significant bits of a
-  register which will be used as an and-style-mask on pixels
+This can be used when there are data dependencies in the assembly code, and need to introduce bubbles in the pipeline.
