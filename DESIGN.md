@@ -106,9 +106,11 @@ This stage gets the next instruction in the memory specified by the value of `PC
 
 This stage will unpack the instruction type bits and the operation code bits of the instruction, determine which instruction this is based on the bits, and create an instance of the instruction to be executed.
 
+Once an instance is created the data will be pulled from the instruction and stored for later use.
+
 ### Execute
 
-This stage will perform whatever operation the instruction calls for.  This is where the actual computing happens
+This stage will perform whatever operation the instruction calls for.  This is where the actual computing happens.  This stage is mostly used for ALU, Logic and Shift instructions since those instructions do most of the computing.
 
 ### Memory Access
 
@@ -116,7 +118,7 @@ If the instruction need to access memory, the instruction will do so in this sta
 
 ### Write back
 
-This stage will write back any values that were computed or found during the course of the instruction to a specified register.
+This stage will write back any values that were computed or found during the course of the instruction to a specified register.  It is this reason why there are holes in some pipelines as they're being computed.  If a later instruction is waiting for a value to be written back to a register, then that instruction will have to wait until this instruction reached this phase.
 
 ## Assembler
 
@@ -126,17 +128,28 @@ By performing two passes of the assembly instructions, we are able to point out 
 
 # How to use Simulator
 
-The simulator can be accessed at this like: 
+The simulator can be accessed at this link: http://l-e-g.github.io/simulator
 
-We we use the WASM library and are able to compile our code into web assembly, we are able to use a front end for out GUI; we chose to use React.  Because of this, we can deploy our GUI so that everyone can use it whenever they want.  
+Since we use the WASM library and are able to compile our code into web assembly, and use a front end for our GUI; we chose to use React.  Because of this, we can deploy our GUI so that everyone can use it whenever they want.  
 
-One on our website, you can begin using our simulator by uploading an assembly file by clicking on the button "Select File" under the Memory File section.  Your files will open up, and you can begin to navigate to your assembly file and click to upload.  Once uploaded, you will see the memory populate with your program.  
+Once on our website, you can begin using our simulator by writing your own assembly code into the text box, or copying and pasting assembly code in.  If you don't want to use assembly code and want to use binary instructions, then you can hit the button "Select File" and a file explorer will pop up and you can select a binary file.
 
 To start the program, there are two options: First is to use the "Step" button, which will walk through the program one instruction at a time.  The other option is to use the "Run" button which will execute the entire program at once.
 
-When using the "Step" button, the pipeline will begin to fill up with your instructions, and you can watch the flow down the pipeline.  At the top the cycle count will grow as the program advances, and the `PC` value will change as the program steps.  If your program includes jumps, you can watch the `PC` value change as it jumps around the instructions in memory.
+When using the "Step" button, the pipeline will begin to fill up with your instructions, and you can watch them flow down the pipeline.  At the top the cycle count will grow as the program advances, and the `PC` value will change as the program steps.  If your program includes jumps, you can watch the `PC` value change as it jumps around the instructions in memory.
 
 There are a few options that can be set before executing the program: to run with or without cache, and to run with or without the pipeline.  When cache is set, the program will utilize the 3 layers of cache to store data.  When the cache is not set the program will use all DRAM to store data.  When the pipeline is set the program will execute all instructions through the pipeline.  When the pipeline is not set the program will execute all stages of the instruction at once.  
+
+# Perfomrance results
+
+The following results are ran off of our Matrix Multiply program that has 63 lines of assembly code.
+
+| Mode                            | Cycle Count |
+| ------------------------------- | ----------- |
+| No Pipeline, No Cache           | 0         |
+| Pipeline, No Cache              | 0         |
+| No Pipeline, Cache              | 0         |
+| Pipeline, Cache                 | 0         |
 
 # Memory
 **Endianess**: Little  
