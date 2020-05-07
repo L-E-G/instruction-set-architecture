@@ -148,12 +148,12 @@ The following results are ran off of our Matrix Multiply program that has 63 lin
 | --------------------- | ----------- |
 | No Pipeline, No Cache | 6615        |
 | Pipeline, No Cache    | 6367        |
-| No Pipeline, Cache    | 7245        |
-| Pipeline, Cache       | 6997        |
+| No Pipeline, Cache    | 9828        |
+| Pipeline, Cache       | 9580        |
 
 As we can see here, running our simulator without a cache will improve our cycle count since we do not have to take the extra time to access the cache as well as access the DRAM.  However if we don't use the cache and don't use the pipeline, then out cycle count goes up because it takes longer to run every instruction linearly.
 
-Similarly, if we run our simulator without a pipeline then then we see a larger cycle count since we have to run our instructions linearly.  Interestingly enough though, it appears that when we run the simulator without a pipeline and without a cache, it runs faster than if we ran it with both.  That must mean that it costs more to add in cache than it does to add in a pipeline because of delays with replacements in the cache. 
+Similarly, if we run our simulator without a pipeline then we see a larger cycle count since we have to run our instructions linearly.  Interestingly enough though, it appears that when we run the simulator without a pipeline and without a cache, it runs faster than if we ran it with both.  That must mean that it costs more to add in cache than it does to add in a pipeline because the cache needs to warm up, and doesn't get to properly do that in time, meaning that the cache experiences many misses at first. 
 
 # Memory
 **Endianess**: Little  
